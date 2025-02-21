@@ -10,11 +10,7 @@
     "migration:create": "node ./src/db/createMigration.js",
     "migrate": "node ./src/db/migrate.js",
     "migrate:rollback": "node ./src/db/migrate.js --rollback",
-    "migrate:rollback:all": "node ./src/db/migrate.js --rollback --all",
-    "seed:create": "node_modules/.bin/sequelize seed:create --name",
-    "seed:run": "node_modules/.bin/sequelize db:seed:all --debug",
-    "seed:undo": "node_modules/.bin/sequelize db:seed:undo",
-    "seed:undo:all": "node_modules/.bin/sequelize db:seed --undo:all"
+    "migrate:rollback:all": "node ./src/db/migrate.js --rollback --all"   
   },
   "author": "",
   "license": "ISC",

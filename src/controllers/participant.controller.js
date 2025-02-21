@@ -56,7 +56,7 @@ export const participantController = {
         [status, id]
       );
       logger.info(`Participant - ${id} status updated to ${status}`);
-      res.status(201).json({ message: "Participant status updated", participant: result.rows[0] });
+      res.status(200).json({ message: `Participant - ${id} status updated to ${status}`, participant: result.rows[0] });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Internal Server Error" });

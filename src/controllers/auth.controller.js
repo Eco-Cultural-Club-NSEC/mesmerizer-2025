@@ -23,9 +23,10 @@ export const authController = {
     try {
       const state = req.query.state || "default_state";
       const scopes = GOOGLE_OAUTH_SCOPES.join(" ");
-      const GOOGLE_OAUTH_CONSENT_SCREEN_URL = `${GOOGLE_OAUTH_URL}?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_CALLBACK_URL}&access_type=offline&response_type=code&state=${state}&scope=${scopes}`;
+      const GOOGLE_OAUTH_CONSENT_SCREEN_URL = `${GOOGLE_OAUTH_URL}?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_CALLBACK_URL}&access_type=offline&prompt=consent&response_type=code&state=${state}&scope=${scopes}`;
       logger.info("Redirecting to google consent screen");
-      res.redirect(GOOGLE_OAUTH_CONSENT_SCREEN_URL);
+      // res.redirect(GOOGLE_OAUTH_CONSENT_SCREEN_URL);
+      res.status(200).json({ url: GOOGLE_OAUTH_CONSENT_SCREEN_URL });
     } catch (err) {
       logger.error(err);
       res.status(500).json({ message: "Internal server error" });
@@ -88,11 +89,37 @@ export const authController = {
         sameSite: "Lax",
       });
 
-      // res.redirect("http://localhost:5173/dashboard");
-      res.status(200).json({ message: "Login successful", user, token });
+      res.redirect("http://localhost:5173/sucess");
+      // res.status(200).json({ message: "Login successful", user });
     } catch (error) {
       logger.error("OAuth Error:", error);
+      // res.status(500).json({ error: error.message });
+      res.redirect("http://localhost:5173/login");
+    }
+  },
+  // logout the user
+  logout: async (req, res) => {
+    try {
+      res.clearCookie("token");
+      res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+      logger.error("Logout Error:", error);
       res.status(500).json({ error: error.message });
+    }
+  },
+  // get current user
+  getCurrentUser: async (req, res) => {
+    try {
+      const user = req.user;
+      
+      //db query to get user details
+      let currectUser = await db("SELECT * FROM users WHERE id = $1", [user.id]);  
+      currectUser = currectUser.rows[0];    
+      logger.info(`Fetched current user: ${currectUser}`);
+      res.status(200).json({ user: currectUser });
+    } catch (error) {
+      logger.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
   },
 };
