@@ -1,12 +1,12 @@
 import logger from "../config/logger.js";
 import { query as db } from "../db/db.js";
-// import {
-//   constructMailBody,
-//   getMailTemplateById,
-//   getParticipantById,
-//   mapEmailTemplateIdToStatus,
-//   sendMail,
-// } from "../utils.js";
+import {
+  constructMailBody,
+  getMailTemplateById,
+  getParticipantById,
+  mapEmailTemplateIdToStatus,
+  sendMail,
+} from "../utils.js";
 
 export const participantController = {
   // get all participants
@@ -62,36 +62,36 @@ export const participantController = {
       const { id } = req.query;
       const { status } = req.query;
       // get participant
-      // const participant = await getParticipantById(id);
+      const participant = await getParticipantById(id);
 
-      // if (!participant) {
-      //   logger.error("Participant not found");
-      //   return res.status(404).json({ message: "Participant not found" });
-      // }
-      // // get corrospnding mail template approval/rejection
-      // const mailTemplateId = mapEmailTemplateIdToStatus(status);
-      // const template = await getMailTemplateById(mailTemplateId);
+      if (!participant) {
+        logger.error("Participant not found");
+        return res.status(404).json({ message: "Participant not found" });
+      }
+      // get corrospnding mail template approval/rejection
+      const mailTemplateId = mapEmailTemplateIdToStatus(status);
+      const template = await getMailTemplateById(mailTemplateId);
 
-      // if (!template) {
-      //   logger.error("Mail template not found");
-      //   return res.status(404).json({ message: "Mail template not found" });
-      // }
+      if (!template) {
+        logger.error("Mail template not found");
+        return res.status(404).json({ message: "Mail template not found" });
+      }
 
-      // // construct mail body by replacing placeholders
-      // const mailBody = constructMailBody({ participant, template });
+      // construct mail body by replacing placeholders
+      const mailBody = constructMailBody({ participant, template });
 
-      // const mailOptions = {
-      //   to: participant.email,
-      //   subject: template.subject,
-      //   content: mailBody,
-      // };
-      // // send mail
-      // const info = await sendMail(mailOptions);
+      const mailOptions = {
+        to: participant.email,
+        subject: template.subject,
+        content: mailBody,
+      };
+      // send mail
+      const info = await sendMail(mailOptions);
 
-      // if (!info) {
-      //   logger.error("Error sending mail");
-      //   return res.status(500).json({ message: "Error sending mail" });
-      // }
+      if (!info) {
+        logger.error("Error sending mail");
+        return res.status(500).json({ message: "Error sending mail" });
+      }
 
       // update status to approved / rejected
       const result = await db(
