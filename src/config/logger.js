@@ -1,3 +1,5 @@
+console.log("logger");
+
 import { createLogger, format, transports } from "winston";
 
 const logger = createLogger({

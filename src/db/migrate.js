@@ -69,7 +69,8 @@ const runMigrations = async (migrations) => {
         );
     `
     );
-
+    
+    console.log("wvrwrwrg");
     // If the migrations table does not exist, run the first migration
     if (!tableExists.rows[0].exists) {
       logger.info(`🚀 Running Initial Migration: ${migrations[0].name}`);
@@ -85,6 +86,7 @@ const runMigrations = async (migrations) => {
     }
 
     for (const migration of migrations) {
+      
       const existingMigration = await db(
         `
                 SELECT * FROM migrations WHERE name = $1;
@@ -111,7 +113,7 @@ const runMigrations = async (migrations) => {
 
     logger.info("✅ All migrations applied successfully");
   } catch (error) {
-    logger.error(`❌ Error running migrations: ${error.message}`);
+    logger.error(`❌ Error running migrations: ${error}`);
   } finally {
     process.exit(0);
   }

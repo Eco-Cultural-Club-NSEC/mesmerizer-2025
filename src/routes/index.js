@@ -1,3 +1,5 @@
+console.log("routes");
+
 import { Router } from "express";
 const apiRouter = Router();
 import userRouter from "./user.js";
@@ -10,7 +12,7 @@ const mountRoutes = (app) => {
   apiRouter.use("/auth", authRouter);
   apiRouter.use("/user", userRouter);
   apiRouter.use("/participants", participantsRouter);
-  apiRouter.use("/mail", mailRouter);
+  apiRouter.use("/email-templates", mailRouter);
 
   //handle undefined routes
   app.all("*", (req, res) => {

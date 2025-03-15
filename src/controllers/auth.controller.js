@@ -1,3 +1,5 @@
+console.log("auth.controller");
+
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -116,7 +118,7 @@ export const authController = {
       let currectUser = await db("SELECT * FROM users WHERE id = $1", [user.id]);  
       currectUser = currectUser.rows[0];    
       logger.info(`Fetched current user: ${currectUser}`);
-      res.status(200).json({ user: currectUser });
+      res.status(200).json({ user: currectUser});
     } catch (error) {
       logger.error(error);
       res.status(500).json({ message: "Internal Server Error" });

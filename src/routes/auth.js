@@ -1,3 +1,5 @@
+console.log("auth");
+
 import { Router } from "express";
 import { authController } from "../controllers/auth.controller.js";
 import verifyAuth from "../middlewares/verifyAuth.js";

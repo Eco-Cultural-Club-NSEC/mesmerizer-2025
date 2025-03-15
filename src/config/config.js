@@ -1,10 +1,14 @@
+console.log("config");
+import dotenv from "dotenv";
+dotenv.config();
+
 export const config = {
     db: {
-        user: "postgres",
-        password: "postgres",
-        host: "localhost",
-        port: 5432,
-        database: "mesmerizer-2025",
-        connectionString: 'postgres://postgres:postgres@localhost:5432/mesmerizer-2025'
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        database: process.env.DB_NAME,
+        connectionString: process.env.DATABASE_URL,
     }
 };

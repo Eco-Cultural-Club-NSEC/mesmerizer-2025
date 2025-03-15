@@ -1,3 +1,5 @@
+console.log("db");
+
 import pg from "pg";
 const { Pool } = pg;
 import { config } from "../config/config.js";

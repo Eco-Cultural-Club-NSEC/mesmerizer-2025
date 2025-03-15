@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres
+    restart: always
+    container_name: mesmerizer-db
+    shm_size: 128mb # memory limit  
+    volumes:
+      - mesmerizer-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: my_db
+    #importent to ensure the DB is ready before starting the app
+    healthcheck:  # Wait for the DB to be ready
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    container_name: mesmerizer-be
+    ports:
+      - 5001:5001
+    depends_on:
+      database:
+        condition: service_healthy  # Wait for DB health check
+    volumes:
+      - .:/usr/src/app # host_machine_app_dir: container_app_dir ->  mount the app directory for hot reloading
+    environment:
+      DB_HOST: mesmerizer-db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: my_db
+      DATABASE_URL: postgres://postgres:postgres@mesmerizer-db:5432/my_db
+    env_file:
+      - .env.local # load local env variables
+
+volumes:
+  mesmerizer-db-data:
