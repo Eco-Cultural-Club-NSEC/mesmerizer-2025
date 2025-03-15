@@ -1,159 +1,188 @@
-import { promises as fs } from "fs";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { query as db } from "./db.js";
+import { sql } from "./db.js";
 import logger from "../config/logger.js";
+import { executeSql, executeTransaction } from "./utils.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const getSortedFilesByCreationTime = async (dir) => {
-  try {
-    const files = await fs.readdir(dir);
-    const fileStats = await Promise.all(
-      files.map(async (file) => {
-        const filePath = path.join(dir, file);
-        const stats = await fs.stat(filePath);
-        return { file, filePath, ctime: stats.ctime };
-      })
-    );
+// Better SQL statement splitting that handles nested statements and dollar quotes
+function splitSqlStatements(sql) {
+  const statements = [];
+  let current = "";
+  let depth = 0;
+  let inString = false;
+  let stringChar = "";
+  let inDollarString = false;
+  let dollarTag = "";
 
-    return fileStats;
-  } catch (error) {
-    console.error(`Error reading directory: ${error.message}`);
-    return [];
-  }
-};
+  for (let i = 0; i < sql.length; i++) {
+    const char = sql[i];
+    const nextChar = sql[i + 1] || "";
 
-const importMigrations = async (dir) => {
-  try {
-    const sortedFiles = await getSortedFilesByCreationTime(dir);
-    const migrationModules = await Promise.all(
-      sortedFiles.map(async ({ filePath }) => import(filePath))
-    );
-
-    return migrationModules; // Array of imported migration objects
-  } catch (error) {
-    console.error(`Error importing migrations: ${error.message}`);
-    return [];
-  }
-};
-
-// actions based on the command line arguments
-(async () => {
-  const migrationsDir = path.resolve(__dirname, "migrations");
-  let migrations = await importMigrations(migrationsDir);
-  migrations = migrations.map((module) => module.default);
-
-  if (process.argv.includes("--rollback") && process.argv.includes("--all")) {
-    rollbackMigrations(migrations);
-  } else if (process.argv.includes("--rollback")) {
-    rollbackLastMigration(migrations);
-  } else {
-    runMigrations(migrations);
-  }
-})();
-
-// run all migrations
-const runMigrations = async (migrations) => {
-  console.log(migrations[0]);
-
-  try {
-    // Check if the migrations table exists
-    const tableExists = await db(
-      `
-        SELECT EXISTS (
-            SELECT 1
-            FROM pg_tables
-            WHERE schemaname = 'public'
-            AND tablename = 'migrations'
-        );
-    `
-    );
-
-    // If the migrations table does not exist, run the first migration
-    if (!tableExists.rows[0].exists) {
-      logger.info(`🚀 Running Initial Migration: ${migrations[0].name}`);
-      // Create the migrations table
-      await migrations[0].up();
-      // Save the initial migration to the log
-      await db(
-        `
-        INSERT INTO migrations (name) VALUES ($1);
-        `,
-        [migrations[0].name]
-      );
+    // Handle dollar quoted strings (e.g. $$ ... $$)
+    if (char === "$" && nextChar === "$" && !inString && !inDollarString) {
+      inDollarString = true;
+      dollarTag = "$$";
+      current += char;
+      continue;
+    }
+    if (
+      inDollarString &&
+      char === "$" &&
+      nextChar === "$" &&
+      dollarTag === "$$"
+    ) {
+      inDollarString = false;
+      dollarTag = "";
     }
 
-    for (const migration of migrations) {
-      const existingMigration = await db(
-        `
-                SELECT * FROM migrations WHERE name = $1;
-            `,
-        [migration.name]
-      );
-
-      if (!existingMigration.rowCount) {
-        logger.info(`🚀 Running Migration: ${migration.name}`);
-        await migration.up();
-        // Save migration to log
-        await db(
-          `
-                    INSERT INTO migrations (name) VALUES ($1);
-                `,
-          [migration.name]
-        );
-      } else {
-        logger.info(
-          `✅ Skipping Migration (Already Applied): ${migration.name}`
-        );
+    // Handle regular strings
+    if ((char === "'" || char === '"') && !inDollarString) {
+      if (!inString) {
+        inString = true;
+        stringChar = char;
+      } else if (stringChar === char) {
+        inString = false;
       }
     }
 
-    logger.info("✅ All migrations applied successfully");
-  } catch (error) {
-    logger.error(`❌ Error running migrations: ${error.message}`);
-  } finally {
-    process.exit(0);
+    // Track nested blocks
+    if (!inString && !inDollarString) {
+      if (char === "(") depth++;
+      if (char === ")") depth--;
+    }
+
+    // Add character to current statement
+    current += char;
+
+    // Statement terminator
+    if (char === ";" && !inString && !inDollarString && depth === 0) {
+      const trimmed = current.trim();
+      if (trimmed) statements.push(trimmed);
+      current = "";
+    }
   }
-};
 
-// rollbacl all migrations
-const rollbackMigrations = async (migrations) => {
+  // Add final statement if exists
+  const trimmed = current.trim();
+  if (trimmed) statements.push(trimmed);
+
+  return statements.filter((stmt) => stmt.length > 0);
+}
+
+async function executeMigration(file) {
+  const sqlContent = fs.readFileSync(
+    path.join(__dirname, "migrations", file),
+    "utf-8"
+  );
+  const statements = splitSqlStatements(sqlContent);
+
   try {
-    for (let i = migrations.length - 1; i >= 0; i--) {
-      const migration = migrations[i];
-      const existingMigration = await db(
-        `
-                SELECT * FROM migrations WHERE name = $1;
-            `,
-        [migration.name]
-      );
+    await executeTransaction(statements);
+    await executeSql("INSERT INTO migrations (name) VALUES ($1)", [file]);
+    logger.info(`Migration ${file} completed successfully`);
+    return true;
+  } catch (error) {
+    logger.error(`Migration ${file} failed:`, error);
+    throw error;
+  }
+}
 
-      if (existingMigration.rowCount) {
-        logger.warn(`🔄 Rolling Back Migration: ${migration.name}`);
-        await migration.down();
-        // Remove migration from log
-        await db(
-          `
-                    DELETE FROM migrations WHERE name = $1;
-                `,
-          [migration.name]
+async function migrate() {
+  try {
+    logger.info("Starting database migration");
+
+    // Ensure migrations directory exists
+    const migrationsDir = path.join(__dirname, "migrations");
+    try {
+      await fs.promises.mkdir(migrationsDir, { recursive: true });
+      logger.info("Migrations directory verified");
+    } catch (error) {
+      logger.error("Failed to create migrations directory:", error);
+      throw error;
+    }
+
+    // Copy init schema to migrations if it doesn't exist
+    const initSchemaSource = path.join(
+      __dirname,
+      "migrations",
+      "20240320_init_schema.sql"
+    );
+    if (!fs.existsSync(initSchemaSource)) {
+      try {
+        await fs.promises.copyFile(
+          path.join(__dirname, "schema", "init.sql"),
+          initSchemaSource
         );
-      } else {
-        logger.info(`⏩ Skipping Rollback (Not Applied): ${migration.name}`);
+        logger.info("Initial schema migration created");
+      } catch (error) {
+        logger.error("Failed to create initial schema migration:", error);
+        throw error;
       }
     }
 
-    logger.info("⏪ Rollback complete");
-  } catch (error) {
-    logger.error(`❌ Error rolling back migrations: ${error.message}`);
-  } finally {
-    process.exit(0);
-  }
-};
+    // Create migrations table
+    await executeSql(`
+      CREATE TABLE IF NOT EXISTS migrations (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) UNIQUE NOT NULL,
+        executed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    logger.info("Migrations table created");
 
-// rollback last migration
-const rollbackLastMigration = (migrations) => {
-  const migration = migrations[migrations.length - 1];
-  rollbackMigrations([migration]);
-};
+    // Get migration files
+    const files = fs
+      .readdirSync(migrationsDir)
+      .filter((f) => f.endsWith(".sql"))
+      .sort();
+
+    logger.info(`Found ${files.length} migration files`);
+
+    // Execute migrations
+    for (const file of files) {
+      try {
+        const filePath = path.join(migrationsDir, file);
+        const content = await fs.promises.readFile(filePath, "utf8");
+
+        logger.info(`Executing migration: ${file}`);
+
+        // Execute migration in transaction
+        await executeSql("BEGIN");
+        try {
+          await executeSql(content);
+          await executeSql(
+            "INSERT INTO migrations (name) VALUES ($1) ON CONFLICT DO NOTHING",
+            [file]
+          );
+          await executeSql("COMMIT");
+          logger.info(`Migration ${file} completed`);
+        } catch (error) {
+          await executeSql("ROLLBACK");
+          throw error;
+        }
+      } catch (error) {
+        logger.error(`Migration ${file} failed:`, error);
+        throw error;
+      }
+    }
+
+    logger.info("All migrations completed successfully");
+    return files.length;
+  } catch (error) {
+    logger.error("Migration process failed:", error);
+    throw error;
+  }
+}
+
+// Allow running directly or as module
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  migrate().catch((error) => {
+    logger.error(error);
+    process.exit(1);
+  });
+}
+
+export default migrate;

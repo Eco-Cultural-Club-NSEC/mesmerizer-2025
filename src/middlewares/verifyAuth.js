@@ -1,22 +1,53 @@
-import jwt from 'jsonwebtoken';
-import logger from '../config/logger.js';
+import jwt from "jsonwebtoken";
+import { sql } from "../db/db.js";
+import logger from "../config/logger.js";
 
-const verifyAuth = (req, res, next) => {
-    const token = req.cookies ? req.cookies.token : null;
-    
+// Middleware to verify JWT token
+const verifyAuth = async (req, res, next) => {
+  try {
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+
     if (!token) {
-        return res.status(401).json({ message: 'Access denied. No token provided.' });
+      return res.status(401).json({ message: "Authentication required" });
     }
 
     try {
-        const secrect = process.env.JWT_SECRET;
-        const decoded = jwt.verify(token, secrect);
-        req.user = decoded;
-        next();
-    } catch (ex) {
-        logger.error(ex);
-        res.status(400).json({ message: 'Invalid token.' });
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // Get the user from the database using sql template literals
+      const users = await sql`SELECT * FROM users WHERE id = ${decoded.id}`;
+
+      if (users.length === 0) {
+        return res.status(401).json({ message: "User not found" });
+      }
+
+      // Attach user to request
+      req.user = users[0];
+      next();
+    } catch (jwtError) {
+      logger.error("JWT verification error:", jwtError);
+      return res.status(401).json({ message: "Invalid token" });
     }
+  } catch (error) {
+    logger.error("Authentication error:", error);
+    return res.status(401).json({ message: "Authentication failed" });
+  }
+};
+
+// Verify if user is admin
+const verifyAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Authentication required" });
+  }
+
+  // Check for is_admin or role === 'admin' to handle different user schemas
+  if (!(req.user.is_admin || req.user.role === "admin")) {
+    logger.warn(`Access denied for user ${req.user.id}: not an admin`);
+    return res.status(403).json({ message: "Admin privileges required" });
+  }
+
+  next();
 };
 
 export default verifyAuth;
+export { verifyAdmin };

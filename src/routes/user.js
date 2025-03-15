@@ -1,14 +1,17 @@
 import { Router } from "express";
-const router = Router();
-// controllers
-import { adminController } from "../controllers/admin.controller.js";
 import { userController } from "../controllers/user.controller.js";
-// middlewares
 import verifyAuth from "../middlewares/verifyAuth.js";
-import isAdmin from "../middlewares/isAdmin.js";
+import { verifyAdmin } from "../middlewares/verifyAuth.js";
 
-// routes -------------------------------------------------
-router.get("/all", verifyAuth, userController.getUsers)
-router.get("/toggleadmin", verifyAuth, isAdmin, adminController.toggleAdmin);
+const router = Router();
+
+// Reorder routes to put most specific first
+router.get("/all", verifyAuth, verifyAdmin, userController.getUsers);
+router.get("/:id", verifyAuth, verifyAdmin, userController.getUserDetails);
+router.post("/", verifyAuth, verifyAdmin, userController.createUser);
+router.put("/:id", verifyAuth, verifyAdmin, userController.updateUser);
+router.delete("/:id", verifyAuth, verifyAdmin, userController.deleteUser);
+// Change PATCH to POST for better compatibility
+router.post("/toggleadmin", verifyAdmin, userController.toggleAdmin);
 
 export default router;

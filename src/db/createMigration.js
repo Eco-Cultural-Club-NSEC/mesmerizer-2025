@@ -1,53 +1,27 @@
 import fs from "fs";
 import path from "path";
 
-// Get migration name from command line arguments
-const args = process.argv.slice(2);
-if (args.length < 1) {
-  console.error(
-    "❌ Please provide a migration name. Example: npm run migration:create -- --name my_migration"
-  );
+const migrationName = process.argv[2];
+if (!migrationName) {
+  console.error("Please provide a migration name");
   process.exit(1);
 }
 
-// Extract the migration name
-const nameIndex = args.indexOf("--name");
-if (nameIndex === -1 || !args[nameIndex + 1]) {
-  console.error("❌ Missing migration name. Use --name <migration_name>");
-  process.exit(1);
-}
+const timestamp = new Date().toISOString().replace(/[-:]/g, "").split(".")[0];
+const filename = `${timestamp}_${migrationName}.sql`;
+const migrationsDir = path.join(process.cwd(), "src", "db", "migrations");
 
-const migrationName = args[nameIndex + 1];
-
-// Define migrations directory
-const migrationsDir = path.resolve("./src/db/migrations");
+// Create migrations directory if it doesn't exist
 if (!fs.existsSync(migrationsDir)) {
   fs.mkdirSync(migrationsDir, { recursive: true });
 }
 
-// Generate timestamped filename
-const timestamp = new Date().toISOString().replace(/[-T:.Z]/g, "");
-const fileName = `${timestamp}_${migrationName}.js`;
-const filePath = path.join(migrationsDir, fileName);
+const template = `-- Up Migration
+-- Write your UP migration SQL here
 
-// Define template content
-const template = `
-import { query as db } from "../db.js";
-
-export default {
-  name: "${fileName}",
-  up: async () => {
-    await db();
-    // Write migration logic here
-  },
-  down: async () => {
-    await db();
-    // Write rollback logic here
-  },
-};
+-- Down Migration
+-- Write your DOWN migration SQL here
 `;
 
-// Create migration file
-fs.writeFileSync(filePath, template);
-
-console.log(`✅ Migration created: ${filePath}`);
+fs.writeFileSync(path.join(migrationsDir, filename), template);
+console.log(`Created migration: ${filename}`);

@@ -1,107 +1,229 @@
 import dotenv from "dotenv";
+import crypto from "crypto";
 dotenv.config();
 
-const GOOGLE_OAUTH_URL = process.env.GOOGLE_OAUTH_URL;
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const GOOGLE_ACCESS_TOKEN_URL = process.env.GOOGLE_ACCESS_TOKEN_URL;
-const GOOGLE_TOKEN_INFO_URL = process.env.GOOGLE_TOKEN_INFO_URL;
-const GOOGLE_OAUTH_SCOPES = [
-  "https%3A//www.googleapis.com/auth/userinfo.email",
+const {
+  GOOGLE_OAUTH_URL,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GOOGLE_ACCESS_TOKEN_URL,
+  GOOGLE_USER_INFO_URL,
+} = process.env;
 
-  "https%3A//www.googleapis.com/auth/userinfo.profile",
+const GOOGLE_OAUTH_SCOPES = [
+  "https://www.googleapis.com/auth/userinfo.email",
+  "https://www.googleapis.com/auth/userinfo.profile",
 ];
 
-import { query as db } from "../db/db.js";
+import { sql } from "../db/db.js";
 import logger from "../config/logger.js";
-import { generateToken } from "../utils.js";
+import { generateToken, comparePassword } from "../utils.js";
+import { emailService } from "../services/email.service.js";
+import { getGoogleTokens, getGoogleUserInfo } from "../utils/googleAuth.js";
+import { constructCallbackUrl } from "../utils/url.js";
 
 export const authController = {
   // google oauth consent screen redirect handler
   googleAuth: async (req, res) => {
     try {
-      const state = req.query.state || "default_state";
+      const state = crypto.randomBytes(16).toString("hex");
       const scopes = GOOGLE_OAUTH_SCOPES.join(" ");
-      const GOOGLE_OAUTH_CONSENT_SCREEN_URL = `${GOOGLE_OAUTH_URL}?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_CALLBACK_URL}&access_type=offline&prompt=consent&response_type=code&state=${state}&scope=${scopes}`;
-      logger.info("Redirecting to google consent screen");
-      // res.redirect(GOOGLE_OAUTH_CONSENT_SCREEN_URL);
-      res.status(200).json({ url: GOOGLE_OAUTH_CONSENT_SCREEN_URL });
-    } catch (err) {
-      logger.error(err);
-      res.status(500).json({ message: "Internal server error" });
+
+      // Get origin from request headers
+      const origin = req.headers.origin;
+      const isAdminRequest = origin === process.env.ADMIN_DASHBOARD_URL;
+
+      // Construct dynamic callback URL
+      const callbackUrl = constructCallbackUrl("/api/v1/auth/google/callback");
+
+      // Store admin flag in state by creating a compound state
+      const stateData = {
+        random: state,
+        isAdmin: isAdminRequest,
+        origin, // Store the origin in state
+      };
+
+      // Encode state data as base64 JSON
+      const encodedState = Buffer.from(JSON.stringify(stateData)).toString(
+        "base64"
+      );
+
+      // Add debug logging
+      logger.info("OAuth configuration:", {
+        clientId: GOOGLE_CLIENT_ID,
+        callbackUrl,
+        scopes,
+        isAdminRequest,
+      });
+
+      // Use URLSearchParams for better URL construction
+      const params = new URLSearchParams({
+        client_id: GOOGLE_CLIENT_ID,
+        redirect_uri: callbackUrl,
+        response_type: "code",
+        scope: scopes,
+        access_type: "offline",
+        state: encodedState,
+        prompt: "consent",
+      });
+
+      const authUrl = `${GOOGLE_OAUTH_URL}?${params.toString()}`;
+      logger.info("Generated OAuth URL:", authUrl);
+
+      return res.status(200).json({
+        success: true,
+        url: authUrl,
+      });
+    } catch (error) {
+      logger.error("OAuth URL generation failed:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to generate OAuth URL",
+        error:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
+      });
     }
   },
   // callback handler for google oauth
   googleAuthCallback: async (req, res) => {
     try {
-      const { code } = req.query;
+      const { code, state } = req.query;
 
-      const data = {
-        code,
-        client_id: GOOGLE_CLIENT_ID,
-        client_secret: GOOGLE_CLIENT_SECRET,
-        redirect_uri: GOOGLE_CALLBACK_URL,
-        grant_type: "authorization_code",
-      };
-
-      const response = await fetch(GOOGLE_ACCESS_TOKEN_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) throw new Error("Failed to fetch access token");
-
-      const access_token_data = await response.json();
-      const { id_token } = access_token_data;
-
-      if (!id_token) throw new Error("ID token missing");
-
-      const token_info_response = await fetch(
-        `${GOOGLE_TOKEN_INFO_URL}?id_token=${id_token}`
-      );
-
-      if (!token_info_response.ok) throw new Error("Invalid ID token");
-
-      const token_info = await token_info_response.json();
-      const { email, name } = token_info;
-
-      let user = await db(`SELECT * FROM users WHERE email = $1`, [email]);
-
-      if (user.rows.length === 0) {
-        user = await db(
-          `INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *`,
-          [name, email]
+      if (!code) {
+        logger.error("No code received from Google");
+        return res.redirect(
+          `${process.env.ADMIN_DASHBOARD_URL}/auth?error=no_code`
         );
       }
 
-      user = user.rows[0];
+      // Decode state to check if admin login
+      let stateData;
+      try {
+        const decodedState = Buffer.from(state, "base64").toString();
+        stateData = JSON.parse(decodedState);
+      } catch (e) {
+        logger.error("Invalid state parameter:", e);
+        return res.redirect(
+          `${process.env.ADMIN_DASHBOARD_URL}/auth?error=invalid_state`
+        );
+      }
 
-      const token = generateToken(user.email, user.id);
+      try {
+        // Start transaction
+        await sql`BEGIN`;
 
-      if (!token) throw new Error("Failed to generate jwt token!");
+        // Construct dynamic callback URL
+        const callbackUrl = constructCallbackUrl(
+          "/api/v1/auth/google/callback"
+        );
 
-      // set token in cookie
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Lax",
-      });
+        // Exchange code for tokens
+        const tokens = await getGoogleTokens(code, callbackUrl);
+        logger.info("Received tokens from Google");
 
-      res.redirect("http://localhost:5173/sucess");
-      // res.status(200).json({ message: "Login successful", user });
+        // Get user info
+        const googleUser = await getGoogleUserInfo(tokens.access_token);
+        logger.info("Received user info from Google");
+
+        // Save/update user with proper SQL syntax using template literals
+        const user = await sql`
+          INSERT INTO users (
+            email, name, google_id, profile_picture, access_token, 
+            refresh_token, token_expires_at, last_login_at, is_admin
+          ) VALUES (
+            ${googleUser.email},
+            ${googleUser.name},
+            ${googleUser.sub},
+            ${googleUser.picture},
+            ${tokens.access_token},
+            ${tokens.refresh_token},
+            ${
+              tokens.expires_in
+                ? new Date(Date.now() + tokens.expires_in * 1000)
+                : null
+            },
+            CURRENT_TIMESTAMP,
+            ${true}
+          )
+          ON CONFLICT (email) DO UPDATE SET
+            name = EXCLUDED.name,
+            google_id = EXCLUDED.google_id,
+            profile_picture = EXCLUDED.profile_picture,
+            access_token = EXCLUDED.access_token,
+            refresh_token = EXCLUDED.refresh_token,
+            token_expires_at = EXCLUDED.token_expires_at,
+            last_login_at = CURRENT_TIMESTAMP
+          RETURNING *
+        `;
+
+        // Generate JWT token
+        const token = generateToken(
+          user[0].email,
+          user[0].id,
+          true // Force admin status for admin dashboard
+        );
+
+        // Set cookie
+        res.cookie("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+          maxAge: 24 * 60 * 60 * 1000,
+          domain:
+            process.env.NODE_ENV === "production"
+              ? process.env.COOKIE_DOMAIN
+              : undefined,
+        });
+
+        await sql`COMMIT`;
+
+        // Redirect to admin dashboard with user data
+        const userData = {
+          id: user[0].id,
+          email: user[0].email,
+          name: user[0].name,
+          is_admin: true,
+        };
+
+        const base64User = Buffer.from(JSON.stringify(userData)).toString(
+          "base64"
+        );
+        return res.redirect(
+          `${process.env.ADMIN_DASHBOARD_URL}/auth?user=${encodeURIComponent(
+            base64User
+          )}`
+        );
+      } catch (error) {
+        await sql`ROLLBACK`;
+        throw error;
+      }
     } catch (error) {
-      logger.error("OAuth Error:", error);
-      // res.status(500).json({ error: error.message });
-      res.redirect("http://localhost:5173/login");
+      logger.error("OAuth callback failed:", error);
+      return res.redirect(
+        `${process.env.ADMIN_DASHBOARD_URL}/auth?error=${encodeURIComponent(
+          error.message
+        )}`
+      );
     }
   },
   // logout the user
   logout: async (req, res) => {
     try {
-      res.clearCookie("token");
-      res.status(200).json({ message: "Logged out successfully" });
+      const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+        path: "/",
+      };
+
+      if (process.env.NODE_ENV === "production") {
+        cookieOptions.domain = process.env.COOKIE_DOMAIN;
+      }
+
+      res.clearCookie("token", cookieOptions);
+      res
+        .status(200)
+        .json({ success: true, message: "Logged out successfully" });
     } catch (error) {
       logger.error("Logout Error:", error);
       res.status(500).json({ error: error.message });
@@ -111,15 +233,184 @@ export const authController = {
   getCurrentUser: async (req, res) => {
     try {
       const user = req.user;
-      
-      //db query to get user details
-      let currectUser = await db("SELECT * FROM users WHERE id = $1", [user.id]);  
-      currectUser = currectUser.rows[0];    
-      logger.info(`Fetched current user: ${currectUser}`);
-      res.status(200).json({ user: currectUser });
+
+      const result = await sql`
+        SELECT id, name, email, is_admin 
+        FROM users 
+        WHERE id = ${user.id}
+      `;
+      const currentUser = result[0];
+      logger.info(`Fetched current user: ${currentUser}`);
+      res.status(200).json({ user: currentUser });
     } catch (error) {
       logger.error(error);
-      res.status(500).json({ message: "Internal Server Error" });
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+  // admin login
+  adminLogin: async (req, res) => {
+    try {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({
+          success: false,
+          message: "Email and password are required",
+        });
+      }
+
+      // First check if user exists and is admin
+      const user = await sql`
+        SELECT * FROM users 
+        WHERE email = ${email.toLowerCase()} 
+        AND is_admin = true
+      `;
+
+      if (!user[0]) {
+        logger.warn(`Admin login attempt failed for email: ${email}`);
+        return res.status(401).json({
+          success: false,
+          message: "Invalid credentials or not an admin user",
+        });
+      }
+
+      const isValidPassword = await comparePassword(password, user[0].password);
+
+      if (!isValidPassword) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid credentials",
+        });
+      }
+
+      const token = generateToken(user[0].email, user[0].id, user[0].is_admin);
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 24 * 60 * 60 * 1000,
+        domain:
+          process.env.NODE_ENV === "production"
+            ? process.env.COOKIE_DOMAIN
+            : undefined,
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Login successful",
+        user: {
+          id: user[0].id,
+          email: user[0].email,
+          name: user[0].name,
+          is_admin: user[0].is_admin,
+        },
+      });
+    } catch (error) {
+      logger.error("Admin login error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  },
+
+  verifyOTP: async (req, res) => {
+    try {
+      const { userId, code } = req.body;
+
+      const user = await sql`
+        SELECT * FROM users 
+        WHERE id = ${userId}
+        AND verification_code = ${code}
+        AND verification_code_expires_at > NOW()
+        AND verification_attempts < 3
+      `;
+
+      if (!user[0]) {
+        await sql`
+          UPDATE users 
+          SET verification_attempts = verification_attempts + 1 
+          WHERE id = ${userId}
+        `;
+        return res.status(401).json({ message: "Invalid or expired code" });
+      }
+
+      // Mark as verified and clear verification data
+      await sql`
+        UPDATE users 
+        SET is_verified = true,
+            verification_code = NULL,
+            verification_code_expires_at = NULL,
+            verification_attempts = 0
+        WHERE id = ${userId}
+      `;
+
+      // Generate token and set cookie
+      const token = generateToken(user[0].email, user[0].id, true);
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        // ...existing cookie options
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Verification successful",
+        user: {
+          id: user[0].id,
+          email: user[0].email,
+          name: user[0].name,
+          is_admin: true,
+        },
+      });
+    } catch (error) {
+      logger.error("Verification error:", error);
+      res.status(500).json({ message: "Verification failed" });
+    }
+  },
+
+  // Development only - admin test login
+  adminTestLogin: async (req, res) => {
+    if (process.env.NODE_ENV !== "development") {
+      return res.status(404).json({ message: "Route not found" });
+    }
+
+    try {
+      const user = await sql`
+        SELECT * FROM users 
+        WHERE email = ${"admin@mesem.com"} 
+        AND is_admin = true
+      `;
+
+      if (!user[0]) {
+        return res.status(404).json({ message: "Admin user not found" });
+      }
+
+      const token = generateToken(user[0].email, user[0].id);
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Lax",
+        domain: new URL(process.env.ADMIN_URL).hostname,
+      });
+
+      return res.status(200).json({
+        success: true,
+        redirectUrl: `${process.env.ADMIN_URL}/dashboard`,
+        user: {
+          id: user[0].id,
+          email: user[0].email,
+          name: user[0].name,
+          isAdmin: user[0].is_admin,
+        },
+      });
+    } catch (error) {
+      logger.error("Admin test login error:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
   },
 };
