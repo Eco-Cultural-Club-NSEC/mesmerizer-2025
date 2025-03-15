@@ -6297,3 +6297,8 @@
 {"level":"info","message":"Fetching registrations...","timestamp":"2025-03-15T17:41:31.599Z"}
 {"level":"info","message":"Templated email sent: <7099bea4-f799-ac37-9ede-9cc968f3e23c@gmail.com> to 69rtaj@gmail.com","timestamp":"2025-03-15T17:41:39.871Z"}
 {"level":"info","message":"Templated email sent: <fdb1b37b-f465-e762-7465-cb9c981cda9d@gmail.com> to 69rtaj@gmail.com","timestamp":"2025-03-15T17:42:06.524Z"}
+{"level":"info","message":"Fetching users...","timestamp":"2025-03-15T17:54:54.022Z"}
+{"level":"info","message":"Fetching registrations...","timestamp":"2025-03-15T17:54:54.025Z"}
+{"level":"info","message":"Fetching users...","timestamp":"2025-03-15T17:54:54.028Z"}
+{"level":"info","message":"Found 1 users","timestamp":"2025-03-15T17:54:54.273Z"}
+{"level":"info","message":"Found 1 users","timestamp":"2025-03-15T17:54:54.749Z"}

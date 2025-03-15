@@ -1,3 +1,5 @@
+#### Use Neon DB for backend, the migrations are in migrations folder, the seeds are in seed folder. First run migrations, then seed
+
 ### ENVs
 
 ```bash
@@ -49,3 +51,219 @@ SKIP_EMAIL_VERIFICATION=true
 # ADMIN_DASHBOARD_URL=https://admin.yourdomain.com
 # ALLOWED_ORIGINS=https://register.yourdomain.com,https://admin.yourdomain.com
 
+## API Documentation
+
+### Base URL
+```
+
+http://localhost:8000/api/v1
+
+````
+
+### Authentication
+
+All routes except registration and login require authentication via session cookie.
+
+#### Google OAuth Login
+```http
+GET /auth/google
+````
+
+Initiates Google OAuth flow. Redirects to Google login page.
+
+#### Get Current User
+
+```http
+GET /auth/me
+Response: {
+  "user": {
+    "id": number,
+    "name": string,
+    "email": string,
+    "is_admin": boolean
+  }
+}
+```
+
+### Event Registration
+
+#### Register for Event
+
+```http
+POST /participant/register
+Content-Type: multipart/form-data
+
+Body: {
+  "eventTitle": string,
+  "eventCode": string,
+  "eventDay": string,
+  "eventTime": string,
+  "eventLocation": string,
+  "teamSize": number,
+  "teamLeadName": string,
+  "participantNames": string[],
+  "email": string,
+  "whatsappNumber": string,
+  "alternatePhone": string,
+  "college": string,
+  "upiTransectionId": string,
+  "paySS": File
+}
+
+Response: {
+  "success": boolean,
+  "registration": {
+    "id": number,
+    "status": "pending" | "approved" | "rejected",
+    ...
+  }
+}
+```
+
+### Admin Endpoints
+
+Requires admin privileges. Add `withCredentials: true` to axios config.
+
+#### Get All Registrations
+
+```http
+GET /participant/registrations
+
+Query Parameters:
+- day: string (optional)
+- event: string (optional)
+- status: "pending" | "approved" | "rejected" (optional)
+- search: string (optional)
+
+Response: {
+  "registrations": [{
+    "id": number,
+    "event_name": string,
+    "team_lead_name": string,
+    "email": string,
+    "status": string,
+    "payment_status": string,
+    "created_at": string,
+    ...
+  }]
+}
+```
+
+#### Update Registration Status
+
+```http
+POST /participant/registration/:id/status
+Content-Type: application/json
+
+Body: {
+  "status": "approved" | "rejected",
+  "reason": string  // Required if status is "rejected"
+}
+
+Response: {
+  "success": boolean,
+  "message": string,
+  "registration": object
+}
+```
+
+#### Email Templates
+
+```http
+GET /email/templates
+
+Response: {
+  "success": boolean,
+  "templates": [{
+    "id": number,
+    "name": string,
+    "subject": string,
+    "template_type": string,
+    "content": string,
+    "variables": object
+  }]
+}
+```
+
+```http
+PUT /email/templates/:id
+Content-Type: application/json
+
+Body: {
+  "name": string,
+  "subject": string,
+  "content": string,
+  "variables": object
+}
+
+Response: {
+  "success": boolean,
+  "message": string,
+  "template": object
+}
+```
+
+### Error Responses
+
+All endpoints return errors in this format:
+
+```json
+{
+  "success": false,
+  "message": "Error description"
+}
+```
+
+Common HTTP Status Codes:
+
+- 400: Bad Request
+- 401: Unauthorized
+- 403: Forbidden (Admin only)
+- 404: Not Found
+- 500: Internal Server Error
+
+### Example Usage (React + Axios)
+
+```typescript
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: "http://localhost:8000/api/v1",
+  withCredentials: true,
+});
+
+// Registration
+const register = async (formData: FormData) => {
+  try {
+    const response = await api.post("/participant/register", formData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// Admin: Get Registrations
+const getRegistrations = async (filters = {}) => {
+  try {
+    const response = await api.get("/participant/registrations", {
+      params: filters,
+    });
+    return response.data.registrations;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// Admin: Update Status
+const updateStatus = async (id: number, status: string, reason?: string) => {
+  try {
+    const response = await api.post(`/participant/registration/${id}/status`, {
+      status,
+      reason,
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+```
