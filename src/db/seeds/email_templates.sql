@@ -49,14 +49,15 @@ VALUES (
             background-repeat: no-repeat;
             position: relative;
             color: #333;
-            padding: 40px 20px;
+            padding: 60px 20px;
             border-radius: 10px 10px 0 0;
-            min-height: 250px;
+            min-height: 200px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            justify-content: flex-start;
+            align-items: flex-start;
             margin-bottom: 0;
+            text-align: left;
         }
         .header:before {
             content: '';
@@ -65,7 +66,7 @@ VALUES (
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 10px 10px 0 0;
         }
         .header * {
@@ -73,12 +74,13 @@ VALUES (
             z-index: 2;
         }
         .logo {
-            max-width: 200px;
-            width: 100%;
+            width: 300px;
             height: auto;
-            margin: 0 auto 20px;
+            margin: 0 0 20px;
             display: block;
             filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+            object-fit: contain;
+            aspect-ratio: 3/1;
         }
         .heading {
             font-size: 48px;
@@ -252,14 +254,15 @@ $email_template$,
             background-repeat: no-repeat;
             position: relative;
             color: #333;
-            padding: 40px 20px;
+            padding: 60px 20px;
             border-radius: 10px 10px 0 0;
-            min-height: 250px;
+            min-height: 200px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            justify-content: flex-start;
+            align-items: flex-start;
             margin-bottom: 0;
+            text-align: left;
         }
         .header:before {
             content: '';
@@ -268,7 +271,7 @@ $email_template$,
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 10px 10px 0 0;
         }
         .header * {
@@ -276,12 +279,13 @@ $email_template$,
             z-index: 2;
         }
         .logo {
-            max-width: 200px;
-            width: 100%;
+            width: 300px;
             height: auto;
-            margin: 0 auto 20px;
+            margin: 0 0 20px;
             display: block;
             filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+            object-fit: contain;
+            aspect-ratio: 3/1;
         }
         .heading {
             font-size: 48px;

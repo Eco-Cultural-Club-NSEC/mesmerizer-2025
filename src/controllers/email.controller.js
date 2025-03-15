@@ -8,13 +8,19 @@ export const emailController = {
     adminRequired,
     async (req, res) => {
       try {
-        const { name, subject, content, variables } = req.body;
+        const {
+          name,
+          subject,
+          content,
+          variables,
+          template_type = "notification",
+        } = req.body;
 
         const result = await db(
-          `INSERT INTO email_templates (name, subject, content, variables)
-           VALUES ($1, $2, $3, $4)
+          `INSERT INTO email_templates (name, subject, content, variables, template_type)
+           VALUES ($1, $2, $3, $4, $5)
            RETURNING *`,
-          [name, subject, content, JSON.stringify(variables)]
+          [name, subject, content, JSON.stringify(variables), template_type]
         );
 
         res.status(201).json({

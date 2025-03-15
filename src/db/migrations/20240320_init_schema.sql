@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS email_templates (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     subject TEXT NOT NULL,
-    template_type VARCHAR(50),
+    template_type VARCHAR(50) NOT NULL DEFAULT 'notification',
     content TEXT NOT NULL,
     variables JSONB,
     description TEXT,

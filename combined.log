@@ -6218,3 +6218,35 @@
 {"level":"info","message":"Admin access granted for user ID 1","timestamp":"2025-03-15T14:38:03.930Z"}
 {"level":"info","message":"Fetching registrations...","timestamp":"2025-03-15T14:38:07.931Z"}
 {"level":"info","message":"Templated email sent: <30015689-8b13-c21a-2da3-f5ea04583083@gmail.com> to 69rtaj@gmail.com","timestamp":"2025-03-15T14:38:16.210Z"}
+{"level":"info","message":"Fetching registrations...","timestamp":"2025-03-15T17:09:54.013Z"}
+{"level":"info","message":"Admin access granted for user ID 1","timestamp":"2025-03-15T17:17:46.192Z"}
+{"code":"23502","column":"template_type","detail":"Failing row contains (1, registration_approval, Registration Approved for {{event}}, \n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"utf-..., null, null, {\"name\": \"string\", \"event\": \"string\", \"eventDate\": \"string\", \"ev..., 2025-03-15 17:18:05.980908+00, 2025-03-15 17:18:05.980908+00).","file":"execMain.c","level":"error","line":"1982","message":"Error updating email template: null value in column \"template_type\" of relation \"email_templates\" violates not-null constraint","name":"NeonDbError","routine":"ExecConstraints","schema":"public","severity":"ERROR","stack":"NeonDbError: null value in column \"template_type\" of relation \"email_templates\" violates not-null constraint\n    at execute (file:///D:/webdev/next/test/mesem/New%20folder/be/node_modules/@neondatabase/serverless/index.mjs:1552:56)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async updateTemplate (file:///D:/webdev/next/test/mesem/New%20folder/be/src/controllers/email.controller.js:59:22)","table":"email_templates","timestamp":"2025-03-15T17:18:05.491Z"}
+{"level":"info","message":"Fetching users...","timestamp":"2025-03-15T17:18:18.488Z"}
+{"level":"info","message":"Fetching registrations...","timestamp":"2025-03-15T17:18:19.085Z"}
+{"level":"info","message":"Found 1 users","timestamp":"2025-03-15T17:18:19.186Z"}
+{"level":"info","message":"Admin access granted for user ID 1","timestamp":"2025-03-15T17:18:25.401Z"}
+{"level":"info","message":"Fetching users...","timestamp":"2025-03-15T17:18:30.916Z"}
+{"level":"info","message":"Found 1 users","timestamp":"2025-03-15T17:18:31.605Z"}
+{"level":"info","message":"Fetching registrations...","timestamp":"2025-03-15T17:18:32.731Z"}
+{"level":"info","message":"Templated email sent: <d1cced66-21a1-20e5-8d27-4c1e240a2977@gmail.com> to 69rtaj@gmail.com","timestamp":"2025-03-15T17:18:45.926Z"}
+{"level":"info","message":"Templated email sent: <b9dbe3cb-123d-fc1f-502f-a8cfb91d0fd4@gmail.com> to 69rtaj@gmail.com","timestamp":"2025-03-15T17:19:44.098Z"}
+{"level":"info","message":"Admin access granted for user ID 1","timestamp":"2025-03-15T17:21:02.843Z"}
+{"level":"info","message":"Fetching users...","timestamp":"2025-03-15T17:21:50.502Z"}
+{"level":"info","message":"Fetching registrations...","timestamp":"2025-03-15T17:21:50.512Z"}
+{"level":"info","message":"Fetching users...","timestamp":"2025-03-15T17:21:50.537Z"}
+{"level":"info","message":"Found 1 users","timestamp":"2025-03-15T17:21:50.770Z"}
+{"level":"info","message":"Found 1 users","timestamp":"2025-03-15T17:21:50.781Z"}
+{"level":"info","message":"Admin access granted for user ID 1","timestamp":"2025-03-15T17:21:51.203Z"}
+{"level":"info","message":"Fetching registrations...","timestamp":"2025-03-15T17:22:39.065Z"}
+{"level":"info","message":"Fetching users...","timestamp":"2025-03-15T17:22:39.075Z"}
+{"level":"info","message":"Fetching users...","timestamp":"2025-03-15T17:22:39.088Z"}
+{"level":"info","message":"Found 1 users","timestamp":"2025-03-15T17:22:39.305Z"}
+{"level":"info","message":"Admin access granted for user ID 1","timestamp":"2025-03-15T17:22:39.308Z"}
+{"level":"info","message":"Found 1 users","timestamp":"2025-03-15T17:22:39.327Z"}
+{"level":"info","message":"Fetching registrations...","timestamp":"2025-03-15T17:22:47.305Z"}
+{"level":"info","message":"Templated email sent: <11da7817-c5b1-62b1-9b5c-b11292fd4c35@gmail.com> to 69rtaj@gmail.com","timestamp":"2025-03-15T17:22:56.002Z"}
+{"level":"info","message":"Admin access granted for user ID 1","timestamp":"2025-03-15T17:23:29.137Z"}
+{"code":"23502","column":"template_type","detail":"Failing row contains (2, registration_rejection, Registration Status Update for {{event}}, \r\n<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"..., null, null, {\"name\": \"string\", \"event\": \"string\", \"reason\": \"string\"}, 2025-03-15 17:25:33.580235+00, 2025-03-15 17:25:33.580235+00).","file":"execMain.c","level":"error","line":"1982","message":"Error updating email template: null value in column \"template_type\" of relation \"email_templates\" violates not-null constraint","name":"NeonDbError","routine":"ExecConstraints","schema":"public","severity":"ERROR","stack":"NeonDbError: null value in column \"template_type\" of relation \"email_templates\" violates not-null constraint\n    at execute (file:///D:/webdev/next/test/mesem/New%20folder/be/node_modules/@neondatabase/serverless/index.mjs:1552:56)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async updateTemplate (file:///D:/webdev/next/test/mesem/New%20folder/be/src/controllers/email.controller.js:59:22)","table":"email_templates","timestamp":"2025-03-15T17:25:33.085Z"}
+{"level":"info","message":"Initializing database connection...","timestamp":"2025-03-15T17:27:13.051Z"}
+{"level":"info","message":"Database connection verified","timestamp":"2025-03-15T17:27:13.946Z"}
+{"level":"info","message":"Database setup verified","timestamp":"2025-03-15T17:27:15.044Z"}
