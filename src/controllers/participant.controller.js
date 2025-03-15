@@ -26,27 +26,33 @@ export const participantController = {
       const {
         name,
         email,
-        phone,
+        whatsapp_no,
+        alt_phone,
         event,
-        payment_method,
+        event_date,
+        event_location,
+        collage_name,
         amount_paid,
         transaction_id,
         transaction_screenshot,
       } = req.body;
       const result = await db(
-        "INSERT INTO participants (name, email, phone, event, payment_method, amount_paid, transaction_id, transaction_screenshot) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
+        "INSERT INTO participants (name, email, whatsapp_no, alt_phone, event, event_date, event_location, collage_name, amount_paid, transaction_id, transaction_screenshot) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *",
         [
           name,
           email,
-          phone,
+          whatsapp_no,
+          alt_phone,
           event,
-          payment_method,
+          event_date,
+          event_location,
+          collage_name,
           amount_paid,
           transaction_id,
           transaction_screenshot,
         ]
       );
-      logger.info(`Participant - ${name} registered`);
+      logger.info(`Participant - ${name[0]} registered`);
       res.status(201).json({
         message: "Participant registered",
         participant: result.rows[0],
