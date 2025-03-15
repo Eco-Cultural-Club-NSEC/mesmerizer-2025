@@ -75,9 +75,21 @@ CREATE TABLE IF NOT EXISTS registrations (
     verification_notes TEXT,
     admin_remarks TEXT,
     upi_transaction_id VARCHAR(255),
+    rejection_reason TEXT,
+    rejection_date TIMESTAMP WITH TIME ZONE,
+    rejected_by INTEGER REFERENCES users(id),
+    approval_date TIMESTAMP WITH TIME ZONE,
+    approved_by INTEGER REFERENCES users(id),
+    verification_status VARCHAR(50) DEFAULT 'pending',
+    verified_by INTEGER REFERENCES users(id),
+    verified_at TIMESTAMP WITH TIME ZONE,
+    CONSTRAINT valid_verification_status CHECK (verification_status IN ('pending', 'verified', 'rejected')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_registrations_status ON registrations(status);
+CREATE INDEX IF NOT EXISTS idx_registrations_verification ON registrations(verification_status);
 
 CREATE TABLE IF NOT EXISTS participants (
     id SERIAL PRIMARY KEY,
@@ -90,11 +102,14 @@ CREATE TABLE IF NOT EXISTS participants (
 CREATE TABLE IF NOT EXISTS email_templates (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    subject VARCHAR(255) NOT NULL,
+    subject TEXT NOT NULL,
+    template_type VARCHAR(50),
     content TEXT NOT NULL,
     variables JSONB,
+    description TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT valid_template_type CHECK (template_type IN ('approval', 'rejection', 'reminder', 'notification'))
 );
 
 CREATE TABLE IF NOT EXISTS email_logs (
