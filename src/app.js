@@ -14,7 +14,7 @@ app.get("/", (req, res) => res.send("Express on Vercel"));
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: "http://localhost:5173", // Frontend URL
+    origin: true, // Allow all origins
     credentials: true, // Allow cookies & authentication headers
     methods: "GET,POST,PUT,DELETE",
     allowedHeaders: "Content-Type,Authorization",
