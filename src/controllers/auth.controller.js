@@ -5,7 +5,7 @@ dotenv.config();
 
 const GOOGLE_OAUTH_URL = process.env.GOOGLE_OAUTH_URL;
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL;
+// const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const GOOGLE_ACCESS_TOKEN_URL = process.env.GOOGLE_ACCESS_TOKEN_URL;
 const GOOGLE_TOKEN_INFO_URL = process.env.GOOGLE_TOKEN_INFO_URL;
@@ -17,7 +17,7 @@ const GOOGLE_OAUTH_SCOPES = [
 
 import { query as db } from "../db/db.js";
 import logger from "../config/logger.js";
-import { FE_REDIRECT_URL, generateToken } from "../utils.js";
+import { FE_REDIRECT_URL, generateToken, GOOGLE_CALLBACK_URL } from "../utils.js";
 
 export const authController = {
   // google oauth consent screen redirect handler
