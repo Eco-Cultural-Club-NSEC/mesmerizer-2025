@@ -176,13 +176,12 @@ export const authController = {
 
         await sql`COMMIT`;
 
-        // Update redirect URL construction
+        // Update redirect URL to always go to /auth instead of /dashboard
         const redirectUrl =
           process.env.NODE_ENV === "production"
             ? process.env.ADMIN_DASHBOARD_URL
             : "http://localhost:5173";
 
-        // Encode user data properly
         const userData = {
           id: user[0].id,
           email: user[0].email,
@@ -193,7 +192,8 @@ export const authController = {
         const base64User = Buffer.from(JSON.stringify(userData)).toString(
           "base64"
         );
-        const authRedirectUrl = `${redirectUrl}/dashboard?user=${encodeURIComponent(
+        // Change redirect to /auth instead of /dashboard
+        const authRedirectUrl = `${redirectUrl}/auth?user=${encodeURIComponent(
           base64User
         )}`;
 
