@@ -17,7 +17,7 @@ app.use(
     origin: true, // Allow all origins
     credentials: true, // Allow cookies & authentication headers
     methods: "GET,POST,PUT,DELETE",
-    allowedHeaders: "Content-Type,Authorization",
+    allowedHeaders: ["Content-Type", "token", "authorization"],
   })
 );
 app.use(cookieParser());
