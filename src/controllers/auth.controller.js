@@ -29,12 +29,12 @@ export const authController = {
       const state = crypto.randomBytes(16).toString("hex");
       const scopes = GOOGLE_OAUTH_SCOPES.join(" ");
 
-      // Get origin from request headers
-      const origin = req.headers.origin;
+      // Get origin from request headers or default to ADMIN_DASHBOARD_URL
+      const origin = req.headers.origin || process.env.ADMIN_DASHBOARD_URL;
       const isAdminRequest = origin === process.env.ADMIN_DASHBOARD_URL;
 
       // Construct dynamic callback URL
-      const callbackUrl = constructCallbackUrl("/api/v1/auth/google/callback");
+      const callbackUrl = `${process.env.BACKEND_URL}/api/v1/auth/google/callback`;
 
       // Store admin flag in state by creating a compound state
       const stateData = {
@@ -163,16 +163,16 @@ export const authController = {
           true // Force admin status for admin dashboard
         );
 
-        // Set cookie
+        // Update cookie settings for production
         res.cookie("token", token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-          maxAge: 24 * 60 * 60 * 1000,
           domain:
             process.env.NODE_ENV === "production"
               ? process.env.COOKIE_DOMAIN
               : undefined,
+          maxAge: 24 * 60 * 60 * 1000, // 24 hours
         });
 
         await sql`COMMIT`;
@@ -188,10 +188,10 @@ export const authController = {
         const base64User = Buffer.from(JSON.stringify(userData)).toString(
           "base64"
         );
+        // Use stored origin from state for redirect
+        const redirectUrl = stateData.origin || process.env.ADMIN_DASHBOARD_URL;
         return res.redirect(
-          `${process.env.ADMIN_DASHBOARD_URL}/auth?user=${encodeURIComponent(
-            base64User
-          )}`
+          `${redirectUrl}/auth?user=${encodeURIComponent(base64User)}`
         );
       } catch (error) {
         await sql`ROLLBACK`;
