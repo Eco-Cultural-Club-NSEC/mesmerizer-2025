@@ -88,7 +88,7 @@ export const authController = {
       res.cookie("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "Lax",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       });
 
       res.redirect(`${FE_REDIRECT_URL}/sucess`);
