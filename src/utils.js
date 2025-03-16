@@ -104,3 +104,8 @@ export const constructMailBody = ({ participant, template } = {}) => {
     .replace(/{{eventLocation}}/g, participant.event_location);
   return mailBody;
 };
+
+export const FE_REDIRECT_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://mesmerizer-admin-2025.vercel.app"
+    : "http://localhost:5173";

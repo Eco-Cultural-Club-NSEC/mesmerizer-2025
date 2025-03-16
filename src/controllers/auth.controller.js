@@ -17,7 +17,7 @@ const GOOGLE_OAUTH_SCOPES = [
 
 import { query as db } from "../db/db.js";
 import logger from "../config/logger.js";
-import { generateToken } from "../utils.js";
+import { FE_REDIRECT_URL, generateToken } from "../utils.js";
 
 export const authController = {
   // google oauth consent screen redirect handler
@@ -91,12 +91,12 @@ export const authController = {
         sameSite: "Lax",
       });
 
-      res.redirect("http://localhost:5173/sucess");
+      res.redirect(`${FE_REDIRECT_URL}/sucess`);
       // res.status(200).json({ message: "Login successful", user });
     } catch (error) {
       logger.error("OAuth Error:", error);
       // res.status(500).json({ error: error.message });
-      res.redirect("http://localhost:5173/login");
+      res.redirect(`${FE_REDIRECT_URL}/login`);
     }
   },
   // logout the user
@@ -113,12 +113,14 @@ export const authController = {
   getCurrentUser: async (req, res) => {
     try {
       const user = req.user;
-      
+
       //db query to get user details
-      let currectUser = await db("SELECT * FROM users WHERE id = $1", [user.id]);  
-      currectUser = currectUser.rows[0];    
+      let currectUser = await db("SELECT * FROM users WHERE id = $1", [
+        user.id,
+      ]);
+      currectUser = currectUser.rows[0];
       logger.info(`Fetched current user: ${currectUser}`);
-      res.status(200).json({ user: currectUser});
+      res.status(200).json({ user: currectUser });
     } catch (error) {
       logger.error(error);
       res.status(500).json({ message: "Internal Server Error" });
