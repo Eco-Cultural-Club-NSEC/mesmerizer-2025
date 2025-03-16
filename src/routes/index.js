@@ -19,7 +19,7 @@ const mountRoutes = (app) => {
     res.status(404).json({ message: "route not found" });
   });
 
-  app.get("/", (req, res) => res.send("Express on Vercel"));
+
 
   //error handling middleware
   app.use((err, req, res, next) => {

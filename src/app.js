@@ -8,6 +8,8 @@ import mountRoutes from "./routes/index.js";
 
 const app = express();
 
+app.get("/", (req, res) => res.send("Express on Vercel"));
+
 // Middleware
 app.use(bodyParser.json());
 app.use(
