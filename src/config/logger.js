@@ -1,7 +1,9 @@
-console.log("logger");
-
 import { createLogger, format, transports } from "winston";
 
+// Check if we're in production (Vercel) or development environment
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Create the logger with appropriate transports based on environment
 const logger = createLogger({
   level: "info",
   format: format.combine(
@@ -11,14 +13,22 @@ const logger = createLogger({
     format.json()
   ),
   transports: [
+    // Console transport is safe in all environments
     new transports.Console({
       format: format.combine(format.colorize(), format.simple()),
     }),
-    new transports.File({ filename: "logs/error.log", level: "error" }),
-    new transports.File({ filename: "logs/combined.log" }),
   ],
-  exceptionHandlers: [new transports.File({ filename: "logs/exceptions.log" })],
-  rejectionHandlers: [new transports.File({ filename: "logs/rejections.log" })],
 });
+
+// Only add file transports in development environment
+if (!isProduction) {
+  // These file transports will only be used locally, not in Vercel
+  logger.add(new transports.File({ filename: "logs/error.log", level: "error" }));
+  logger.add(new transports.File({ filename: "logs/combined.log" }));
+  
+  // Add exception and rejection handlers for local development
+  logger.exceptions.handle(new transports.File({ filename: "logs/exceptions.log" }));
+  logger.rejections.handle(new transports.File({ filename: "logs/rejections.log" }));
+}
 
 export default logger;
