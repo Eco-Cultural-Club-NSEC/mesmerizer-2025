@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import mountRoutes from "./routes/index.js";
 import path from "path";
+import logger from "./config/logger.js"; // Add this import
 
 const app = express();
 
@@ -38,18 +39,38 @@ app.options("*", cors(corsConfig));
 app.use(cookieParser());
 app.use(express.json());
 
+// Add request logging middleware
+app.use((req, res, next) => {
+  logger.info(`${req.method} ${req.url}`, {
+    origin: req.headers.origin,
+    userIP: req.ip,
+  });
+  next();
+});
+
 // Add static file serving for uploaded images
 // app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Add error handling middleware before routes
 app.use((err, req, res, next) => {
-  console.error("Error:", err);
+  logger.error("API Error:", {
+    error: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    origin: req.headers.origin,
+  });
+
   res.header("Access-Control-Allow-Credentials", "true");
   res.header("Access-Control-Allow-Origin", req.headers.origin);
-  res.status(err.status || 500).json({
+
+  const errorResponse = {
+    success: false,
     message: err.message || "Internal Server Error",
-    stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
-  });
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+  };
+
+  res.status(err.status || 500).json(errorResponse);
 });
 
 // Routes
