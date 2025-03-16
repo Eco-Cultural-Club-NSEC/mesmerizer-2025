@@ -1,6 +1,24 @@
 import dotenv from "dotenv";
 import crypto from "crypto";
-dotenv.config();
+
+// Move dotenv config to top and force reload
+dotenv.config({ override: true });
+
+// Validate required environment variables
+const requiredEnvVars = [
+  "GOOGLE_OAUTH_URL",
+  "GOOGLE_CLIENT_ID",
+  "GOOGLE_CLIENT_SECRET",
+  "GOOGLE_ACCESS_TOKEN_URL",
+  "GOOGLE_USER_INFO_URL",
+  "JWT_SECRET",
+];
+
+requiredEnvVars.forEach((varName) => {
+  if (!process.env[varName]) {
+    throw new Error(`Missing required environment variable: ${varName}`);
+  }
+});
 
 const {
   GOOGLE_OAUTH_URL,
@@ -9,6 +27,9 @@ const {
   GOOGLE_ACCESS_TOKEN_URL,
   GOOGLE_USER_INFO_URL,
 } = process.env;
+
+// Add debug logging
+console.log("Loaded CLIENT_ID:", GOOGLE_CLIENT_ID);
 
 const GOOGLE_OAUTH_SCOPES = [
   "https://www.googleapis.com/auth/userinfo.email",
@@ -20,12 +41,16 @@ import logger from "../config/logger.js";
 import { generateToken, comparePassword } from "../utils.js";
 import { emailService } from "../services/email.service.js";
 import { getGoogleTokens, getGoogleUserInfo } from "../utils/googleAuth.js";
-import { constructCallbackUrl } from "../utils/url.js";
+import { constructCallbackUrl, getBackendUrl } from "../utils/url.js";
 
 export const authController = {
-  // google oauth consent screen redirect handler
   googleAuth: async (req, res) => {
     try {
+      // Add validation
+      if (!GOOGLE_CLIENT_ID) {
+        throw new Error("Google Client ID is not configured");
+      }
+
       const state = crypto.randomBytes(16).toString("hex");
       const scopes = GOOGLE_OAUTH_SCOPES.join(" ");
 
@@ -33,8 +58,9 @@ export const authController = {
       const origin = req.headers.origin || process.env.ADMIN_DASHBOARD_URL;
       const isAdminRequest = origin === process.env.ADMIN_DASHBOARD_URL;
 
-      // Construct dynamic callback URL
-      const callbackUrl = `${process.env.BACKEND_URL}/api/v1/auth/google/callback`;
+      // Get backend URL dynamically
+      const backendUrl = getBackendUrl()(req);
+      const callbackUrl = `${backendUrl}/api/v1/auth/google/callback`;
       logger.info("Callback URL:", callbackUrl); // Add logging
 
       // Store admin flag in state by creating a compound state
@@ -71,21 +97,28 @@ export const authController = {
       const authUrl = `${GOOGLE_OAUTH_URL}?${params.toString()}`;
       logger.info("Generated OAuth URL:", authUrl);
 
+      // Debug log the full auth URL
+      logger.info("Auth URL Parameters:", {
+        client_id: GOOGLE_CLIENT_ID,
+        redirect_uri: callbackUrl,
+        scope: scopes,
+        state: encodedState,
+      });
+
       return res.status(200).json({
         success: true,
         url: authUrl,
       });
     } catch (error) {
-      logger.error("OAuth URL generation failed:", error);
+      logger.error("OAuth Configuration Error:", error);
       return res.status(500).json({
         success: false,
-        message: "Failed to generate OAuth URL",
+        message: "OAuth configuration error",
         error:
           process.env.NODE_ENV === "development" ? error.message : undefined,
       });
     }
   },
-  // callback handler for google oauth
   googleAuthCallback: async (req, res) => {
     try {
       const { code, state } = req.query;
@@ -111,10 +144,9 @@ export const authController = {
         // Start transaction
         await sql`BEGIN`;
 
-        // Construct dynamic callback URL
-        const callbackUrl = constructCallbackUrl(
-          "/api/v1/auth/google/callback"
-        );
+        // Get backend URL dynamically
+        const backendUrl = getBackendUrl()(req);
+        const callbackUrl = `${backendUrl}/api/v1/auth/google/callback`;
 
         // Exchange code for tokens
         const tokens = await getGoogleTokens(code, callbackUrl);
@@ -211,7 +243,6 @@ export const authController = {
       return res.redirect(errorUrl);
     }
   },
-  // logout the user
   logout: async (req, res) => {
     try {
       const cookieOptions = {
@@ -234,7 +265,6 @@ export const authController = {
       res.status(500).json({ error: error.message });
     }
   },
-  // get current user
   getCurrentUser: async (req, res) => {
     try {
       const user = req.user;
@@ -252,7 +282,6 @@ export const authController = {
       res.status(500).json({ message: "Internal server error" });
     }
   },
-  // admin login
   adminLogin: async (req, res) => {
     try {
       const { email, password } = req.body;

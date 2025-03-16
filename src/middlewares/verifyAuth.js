@@ -2,6 +2,11 @@ import jwt from "jsonwebtoken";
 import { sql } from "../db/db.js";
 import logger from "../config/logger.js";
 
+// Validate JWT_SECRET
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is not set");
+}
+
 // Middleware to verify JWT token
 const verifyAuth = async (req, res, next) => {
   try {
@@ -12,6 +17,12 @@ const verifyAuth = async (req, res, next) => {
     }
 
     try {
+      // Add more debug logging
+      logger.info(
+        "Verifying token with secret length:",
+        process.env.JWT_SECRET.length
+      );
+
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // Get the user from the database using sql template literals
@@ -25,7 +36,11 @@ const verifyAuth = async (req, res, next) => {
       req.user = users[0];
       next();
     } catch (jwtError) {
-      logger.error("JWT verification error:", jwtError);
+      logger.error("JWT verification error:", {
+        error: jwtError.message,
+        token: token.substring(0, 10) + "...",
+        secretLength: process.env.JWT_SECRET.length,
+      });
       return res.status(401).json({ message: "Invalid token" });
     }
   } catch (error) {

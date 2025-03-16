@@ -7,19 +7,15 @@ import path from "path";
 
 const app = express();
 
-// Unified CORS configuration
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [
-  "http://localhost:5173", // Frontend
-  "http://localhost:5174", // Admin dashboard
-];
-
+// Permissive CORS configuration for all environments
 const corsConfig = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, etc.)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
+    // Allow all origins
+    callback(null, true);
+
+    // Log origins in production for monitoring
+    if (process.env.NODE_ENV === "production") {
+      console.log(`CORS request from origin: ${origin}`);
     }
   },
   credentials: true,
@@ -32,6 +28,7 @@ const corsConfig = {
     "Accept",
     "Origin",
   ],
+  exposedHeaders: ["set-cookie"],
 };
 
 // Apply CORS configuration

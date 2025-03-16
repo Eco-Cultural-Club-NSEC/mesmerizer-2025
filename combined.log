@@ -6369,3 +6369,91 @@
 {"level":"info","message":"Initializing database connection...","timestamp":"2025-03-16T09:55:51.388Z"}
 {"level":"info","message":"Database connection verified","timestamp":"2025-03-16T09:55:52.454Z"}
 {"level":"info","message":"Database setup verified","timestamp":"2025-03-16T09:55:53.386Z"}
+{"level":"info","message":"Initializing database connection...","timestamp":"2025-03-16T10:03:41.500Z"}
+{"level":"info","message":"Database connection verified","timestamp":"2025-03-16T10:03:42.817Z"}
+{"level":"info","message":"Database setup verified","timestamp":"2025-03-16T10:03:43.767Z"}
+{"level":"info","message":"Initializing database connection...","timestamp":"2025-03-16T10:13:50.956Z"}
+{"level":"info","message":"Database connection verified","timestamp":"2025-03-16T10:13:52.242Z"}
+{"level":"info","message":"Database setup verified","timestamp":"2025-03-16T10:13:53.277Z"}
+{"level":"info","message":"Initializing database connection...","timestamp":"2025-03-16T12:48:39.347Z"}
+{"level":"info","message":"Database connection verified","timestamp":"2025-03-16T12:48:41.596Z"}
+{"level":"info","message":"Database setup verified","timestamp":"2025-03-16T12:48:42.634Z"}
+{"level":"info","message":"Initializing database connection...","timestamp":"2025-03-16T13:08:43.059Z"}
+{"level":"info","message":"Database connection verified","timestamp":"2025-03-16T13:08:44.830Z"}
+{"level":"info","message":"Database setup verified","timestamp":"2025-03-16T13:08:45.885Z"}
+{"level":"info","message":"Initializing database connection...","timestamp":"2025-03-16T13:09:52.580Z"}
+{"level":"info","message":"Database connection verified","timestamp":"2025-03-16T13:09:53.503Z"}
+{"level":"info","message":"Database setup verified","timestamp":"2025-03-16T13:09:54.554Z"}
+{"level":"info","message":"Initializing database connection...","timestamp":"2025-03-16T16:14:03.629Z"}
+{"level":"info","message":"Database connection verified","timestamp":"2025-03-16T16:14:05.587Z"}
+{"level":"info","message":"Database setup verified","timestamp":"2025-03-16T16:14:06.617Z"}
+{"level":"error","message":"JWT verification error: invalid signature","name":"JsonWebTokenError","stack":"JsonWebTokenError: invalid signature\n    at D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\jsonwebtoken\\verify.js:171:19\n    at getSecret (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\jsonwebtoken\\verify.js:97:14)\n    at module.exports [as verify] (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\jsonwebtoken\\verify.js:101:10)\n    at verifyAuth (file:///D:/webdev/next/test/mesem/New%20folder/be/src/middlewares/verifyAuth.js:15:27)\n    at Layer.handle [as handle_request] (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at Route.dispatch (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\route.js:119:3)\n    at Layer.handle [as handle_request] (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\index.js:284:15\n    at Function.process_params (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\index.js:346:12)","timestamp":"2025-03-16T16:14:17.159Z"}
+{"level":"info","message":"Callback URL:","timestamp":"2025-03-16T16:14:20.262Z"}
+{"callbackUrl":"https://api-mesm-test.vercel.app/api/v1/auth/google/callback","clientId":"your_production_client_id","isAdminRequest":false,"level":"info","message":"OAuth configuration:","scopes":"https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile","timestamp":"2025-03-16T16:14:20.263Z"}
+{"level":"info","message":"Generated OAuth URL:","timestamp":"2025-03-16T16:14:20.265Z"}
+{"level":"error","message":"JWT verification error: invalid signature","name":"JsonWebTokenError","stack":"JsonWebTokenError: invalid signature\n    at D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\jsonwebtoken\\verify.js:171:19\n    at getSecret (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\jsonwebtoken\\verify.js:97:14)\n    at module.exports [as verify] (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\jsonwebtoken\\verify.js:101:10)\n    at verifyAuth (file:///D:/webdev/next/test/mesem/New%20folder/be/src/middlewares/verifyAuth.js:15:27)\n    at Layer.handle [as handle_request] (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at Route.dispatch (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\route.js:119:3)\n    at Layer.handle [as handle_request] (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\index.js:284:15\n    at Function.process_params (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\index.js:346:12)","timestamp":"2025-03-16T16:16:35.482Z"}
+{"level":"info","message":"Callback URL:","timestamp":"2025-03-16T16:16:37.266Z"}
+{"callbackUrl":"https://api-mesm-test.vercel.app/api/v1/auth/google/callback","clientId":"your_production_client_id","isAdminRequest":false,"level":"info","message":"OAuth configuration:","scopes":"https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile","timestamp":"2025-03-16T16:16:37.267Z"}
+{"level":"info","message":"Generated OAuth URL:","timestamp":"2025-03-16T16:16:37.268Z"}
+{"level":"error","message":"JWT verification error: invalid signature","name":"JsonWebTokenError","stack":"JsonWebTokenError: invalid signature\n    at D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\jsonwebtoken\\verify.js:171:19\n    at getSecret (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\jsonwebtoken\\verify.js:97:14)\n    at module.exports [as verify] (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\jsonwebtoken\\verify.js:101:10)\n    at verifyAuth (file:///D:/webdev/next/test/mesem/New%20folder/be/src/middlewares/verifyAuth.js:15:27)\n    at Layer.handle [as handle_request] (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at Route.dispatch (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\route.js:119:3)\n    at Layer.handle [as handle_request] (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\index.js:284:15\n    at Function.process_params (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\index.js:346:12)","timestamp":"2025-03-16T16:17:52.081Z"}
+{"level":"info","message":"Callback URL:","timestamp":"2025-03-16T16:17:53.209Z"}
+{"callbackUrl":"https://api-mesm-test.vercel.app/api/v1/auth/google/callback","clientId":"your_production_client_id","isAdminRequest":false,"level":"info","message":"OAuth configuration:","scopes":"https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile","timestamp":"2025-03-16T16:17:53.210Z"}
+{"level":"info","message":"Generated OAuth URL:","timestamp":"2025-03-16T16:17:53.211Z"}
+{"level":"error","message":"JWT verification error: invalid signature","name":"JsonWebTokenError","stack":"JsonWebTokenError: invalid signature\n    at D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\jsonwebtoken\\verify.js:171:19\n    at getSecret (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\jsonwebtoken\\verify.js:97:14)\n    at module.exports [as verify] (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\jsonwebtoken\\verify.js:101:10)\n    at verifyAuth (file:///D:/webdev/next/test/mesem/New%20folder/be/src/middlewares/verifyAuth.js:15:27)\n    at Layer.handle [as handle_request] (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at Route.dispatch (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\route.js:119:3)\n    at Layer.handle [as handle_request] (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\index.js:284:15\n    at Function.process_params (D:\\webdev\\next\\test\\mesem\\New folder\\be\\node_modules\\express\\lib\\router\\index.js:346:12)","timestamp":"2025-03-16T16:18:06.261Z"}
+{"level":"info","message":"Initializing database connection...","timestamp":"2025-03-16T16:21:44.564Z"}
+{"level":"info","message":"Initializing database connection...","timestamp":"2025-03-16T16:21:46.223Z"}
+{"level":"info","message":"Database connection verified","timestamp":"2025-03-16T16:21:47.233Z"}
+{"level":"info","message":"Database setup verified","timestamp":"2025-03-16T16:21:48.263Z"}
+{"level":"info","message":"Callback URL:","timestamp":"2025-03-16T16:22:50.855Z"}
+{"callbackUrl":"http://localhost:8000/api/v1/auth/google/callback","clientId":"305739693579-263ccdqk0321j8euq98tcvplm7ifi3qm.apps.googleusercontent.com","isAdminRequest":true,"level":"info","message":"OAuth configuration:","scopes":"https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile","timestamp":"2025-03-16T16:22:50.856Z"}
+{"level":"info","message":"Generated OAuth URL:","timestamp":"2025-03-16T16:22:50.857Z"}
+{"client_id":"305739693579-263ccdqk0321j8euq98tcvplm7ifi3qm.apps.googleusercontent.com","level":"info","message":"Auth URL Parameters:","redirect_uri":"http://localhost:8000/api/v1/auth/google/callback","scope":"https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile","state":"eyJyYW5kb20iOiIyYjExZDZhNmYzOWY2ODE4NjMzNDg2NDdkMWI2ZmY5NiIsImlzQWRtaW4iOnRydWUsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTE3MyJ9","timestamp":"2025-03-16T16:22:50.858Z"}
+{"level":"info","message":"Using callback URL:","timestamp":"2025-03-16T16:23:11.169Z"}
+{"level":"info","message":"Received tokens from Google","timestamp":"2025-03-16T16:23:11.513Z"}
+{"level":"info","message":"Received user info from Google","timestamp":"2025-03-16T16:23:11.837Z"}
+{"level":"info","message":"Redirecting to:","timestamp":"2025-03-16T16:23:12.918Z"}
+{"level":"info","message":"Verifying token with secret length:","timestamp":"2025-03-16T16:23:13.993Z"}
+{"level":"info","message":"Verifying token with secret length:","timestamp":"2025-03-16T16:23:14.002Z"}
+{"level":"info","message":"Fetching users...","timestamp":"2025-03-16T16:23:14.244Z"}
+{"level":"info","message":"Fetching registrations...","timestamp":"2025-03-16T16:23:14.252Z"}
+{"level":"info","message":"Found 1 users","timestamp":"2025-03-16T16:23:14.993Z"}
+{"level":"info","message":"Verifying token with secret length:","timestamp":"2025-03-16T16:23:17.343Z"}
+{"level":"info","message":"Fetching registrations...","timestamp":"2025-03-16T16:23:17.580Z"}
+{"level":"info","message":"Initializing database connection...","timestamp":"2025-03-16T16:26:40.040Z"}
+{"level":"info","message":"Database connection verified","timestamp":"2025-03-16T16:26:40.981Z"}
+{"level":"info","message":"Database setup verified","timestamp":"2025-03-16T16:26:41.908Z"}
+{"level":"info","message":"Callback URL:","timestamp":"2025-03-16T16:30:08.205Z"}
+{"callbackUrl":"http://localhost:8000/api/v1/auth/google/callback","clientId":"305739693579-263ccdqk0321j8euq98tcvplm7ifi3qm.apps.googleusercontent.com","isAdminRequest":true,"level":"info","message":"OAuth configuration:","scopes":"https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile","timestamp":"2025-03-16T16:30:08.206Z"}
+{"level":"info","message":"Generated OAuth URL:","timestamp":"2025-03-16T16:30:08.208Z"}
+{"client_id":"305739693579-263ccdqk0321j8euq98tcvplm7ifi3qm.apps.googleusercontent.com","level":"info","message":"Auth URL Parameters:","redirect_uri":"http://localhost:8000/api/v1/auth/google/callback","scope":"https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile","state":"eyJyYW5kb20iOiJlMmEzOTAxMmUzNThiZjgwMWI1MzEzNzU3M2UxZmZjNSIsImlzQWRtaW4iOnRydWUsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTE3MyJ9","timestamp":"2025-03-16T16:30:08.209Z"}
+{"level":"info","message":"Using callback URL:","timestamp":"2025-03-16T16:31:51.271Z"}
+{"level":"info","message":"Received tokens from Google","timestamp":"2025-03-16T16:31:51.609Z"}
+{"level":"info","message":"Received user info from Google","timestamp":"2025-03-16T16:31:51.881Z"}
+{"level":"info","message":"Redirecting to:","timestamp":"2025-03-16T16:31:52.820Z"}
+{"level":"info","message":"Verifying token with secret length:","timestamp":"2025-03-16T16:31:53.886Z"}
+{"level":"info","message":"Verifying token with secret length:","timestamp":"2025-03-16T16:31:53.894Z"}
+{"level":"info","message":"Fetching registrations...","timestamp":"2025-03-16T16:31:54.143Z"}
+{"level":"info","message":"Fetching users...","timestamp":"2025-03-16T16:31:54.149Z"}
+{"level":"info","message":"Found 1 users","timestamp":"2025-03-16T16:31:54.382Z"}
+{"level":"info","message":"Verifying token with secret length:","timestamp":"2025-03-16T16:32:04.010Z"}
+{"level":"info","message":"Fetching registrations...","timestamp":"2025-03-16T16:32:04.729Z"}
+{"level":"info","message":"Verifying token with secret length:","timestamp":"2025-03-16T16:32:55.114Z"}
+{"level":"info","message":"Verifying token with secret length:","timestamp":"2025-03-16T16:32:55.123Z"}
+{"level":"info","message":"Verifying token with secret length:","timestamp":"2025-03-16T16:32:55.132Z"}
+{"level":"info","message":"Fetching registrations...","timestamp":"2025-03-16T16:32:55.862Z"}
+{"level":"info","message":"Fetching users...","timestamp":"2025-03-16T16:32:55.865Z"}
+{"level":"info","message":"Fetching users...","timestamp":"2025-03-16T16:32:55.868Z"}
+{"level":"info","message":"Found 1 users","timestamp":"2025-03-16T16:32:56.654Z"}
+{"level":"info","message":"Found 1 users","timestamp":"2025-03-16T16:32:56.658Z"}
+{"level":"info","message":"Callback URL:","timestamp":"2025-03-16T16:45:26.145Z"}
+{"callbackUrl":"http://localhost:8000/api/v1/auth/google/callback","clientId":"305739693579-263ccdqk0321j8euq98tcvplm7ifi3qm.apps.googleusercontent.com","isAdminRequest":true,"level":"info","message":"OAuth configuration:","scopes":"https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile","timestamp":"2025-03-16T16:45:26.163Z"}
+{"level":"info","message":"Generated OAuth URL:","timestamp":"2025-03-16T16:45:26.165Z"}
+{"client_id":"305739693579-263ccdqk0321j8euq98tcvplm7ifi3qm.apps.googleusercontent.com","level":"info","message":"Auth URL Parameters:","redirect_uri":"http://localhost:8000/api/v1/auth/google/callback","scope":"https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile","state":"eyJyYW5kb20iOiIyZDk2MmFjYjg2MzNhNjkwMTI1ZGQ1ZDBhM2RmYTIzOSIsImlzQWRtaW4iOnRydWUsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTE3MyJ9","timestamp":"2025-03-16T16:45:26.166Z"}
+{"level":"info","message":"Verifying token with secret length:","timestamp":"2025-03-16T16:45:33.824Z"}
+{"level":"info","message":"Verifying token with secret length:","timestamp":"2025-03-16T16:45:33.829Z"}
+{"level":"info","message":"Verifying token with secret length:","timestamp":"2025-03-16T16:45:33.838Z"}
+{"level":"info","message":"Fetching users...","timestamp":"2025-03-16T16:45:34.705Z"}
+{"level":"info","message":"Fetching registrations...","timestamp":"2025-03-16T16:45:34.708Z"}
+{"level":"info","message":"Fetching users...","timestamp":"2025-03-16T16:45:34.715Z"}
+{"level":"info","message":"Found 1 users","timestamp":"2025-03-16T16:45:34.955Z"}
+{"level":"info","message":"Found 1 users","timestamp":"2025-03-16T16:45:35.401Z"}
