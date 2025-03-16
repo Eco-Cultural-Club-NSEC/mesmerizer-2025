@@ -28,7 +28,10 @@ const importMigrations = async (dir) => {
   try {
     const sortedFiles = await getSortedFilesByCreationTime(dir);
     const migrationModules = await Promise.all(
-      sortedFiles.map(async ({ filePath }) => import(filePath))
+      sortedFiles.map(async ({ filePath }) => {
+        const fileUrl = new URL(`file://${filePath.replace(/\\/g, '/')}`);
+        return import(fileUrl);
+      })
     );
 
     return migrationModules; // Array of imported migration objects
