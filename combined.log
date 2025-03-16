@@ -6360,3 +6360,9 @@
 {"level":"info","message":"Admin access granted for user ID 1","timestamp":"2025-03-16T09:35:33.013Z"}
 {"level":"info","message":"Found 1 users","timestamp":"2025-03-16T09:35:33.038Z"}
 {"level":"info","message":"Initializing database connection...","timestamp":"2025-03-16T09:41:12.191Z"}
+{"level":"info","message":"Initializing database connection...","timestamp":"2025-03-16T09:41:15.207Z"}
+{"level":"info","message":"Database connection verified","timestamp":"2025-03-16T09:41:16.209Z"}
+{"level":"info","message":"Database setup verified","timestamp":"2025-03-16T09:41:17.311Z"}
+{"level":"info","message":"Initializing database connection...","timestamp":"2025-03-16T09:53:52.039Z"}
+{"level":"info","message":"Database connection verified","timestamp":"2025-03-16T09:53:53.107Z"}
+{"level":"info","message":"Database setup verified","timestamp":"2025-03-16T09:53:54.075Z"}

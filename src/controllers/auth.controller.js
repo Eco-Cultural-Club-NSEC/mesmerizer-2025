@@ -35,6 +35,7 @@ export const authController = {
 
       // Construct dynamic callback URL
       const callbackUrl = `${process.env.BACKEND_URL}/api/v1/auth/google/callback`;
+      logger.info("Callback URL:", callbackUrl); // Add logging
 
       // Store admin flag in state by creating a compound state
       const stateData = {
@@ -91,9 +92,7 @@ export const authController = {
 
       if (!code) {
         logger.error("No code received from Google");
-        return res.redirect(
-          `${process.env.ADMIN_DASHBOARD_URL}/auth?error=no_code`
-        );
+        return res.redirect(`${process.env.ADMIN_DASHBOARD_URL}?error=no_code`);
       }
 
       // Decode state to check if admin login
@@ -104,7 +103,7 @@ export const authController = {
       } catch (e) {
         logger.error("Invalid state parameter:", e);
         return res.redirect(
-          `${process.env.ADMIN_DASHBOARD_URL}/auth?error=invalid_state`
+          `${process.env.ADMIN_DASHBOARD_URL}?error=invalid_state`
         );
       }
 
@@ -177,7 +176,13 @@ export const authController = {
 
         await sql`COMMIT`;
 
-        // Redirect to admin dashboard with user data
+        // Update redirect URL construction
+        const redirectUrl =
+          process.env.NODE_ENV === "production"
+            ? process.env.ADMIN_DASHBOARD_URL
+            : "http://localhost:5173";
+
+        // Encode user data properly
         const userData = {
           id: user[0].id,
           email: user[0].email,
@@ -188,22 +193,22 @@ export const authController = {
         const base64User = Buffer.from(JSON.stringify(userData)).toString(
           "base64"
         );
-        // Use stored origin from state for redirect
-        const redirectUrl = stateData.origin || process.env.ADMIN_DASHBOARD_URL;
-        return res.redirect(
-          `${redirectUrl}/auth?user=${encodeURIComponent(base64User)}`
-        );
+        const authRedirectUrl = `${redirectUrl}/dashboard?user=${encodeURIComponent(
+          base64User
+        )}`;
+
+        logger.info("Redirecting to:", authRedirectUrl);
+        return res.redirect(authRedirectUrl);
       } catch (error) {
         await sql`ROLLBACK`;
         throw error;
       }
     } catch (error) {
       logger.error("OAuth callback failed:", error);
-      return res.redirect(
-        `${process.env.ADMIN_DASHBOARD_URL}/auth?error=${encodeURIComponent(
-          error.message
-        )}`
-      );
+      const errorUrl = `${
+        process.env.ADMIN_DASHBOARD_URL
+      }/login?error=${encodeURIComponent(error.message)}`;
+      return res.redirect(errorUrl);
     }
   },
   // logout the user
