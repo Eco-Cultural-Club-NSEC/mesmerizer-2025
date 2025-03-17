@@ -107,7 +107,7 @@ export const constructMailBody = ({ participant, template } = {}) => {
 
 export const FE_REDIRECT_URL =
   process.env.NODE_ENV === "production"
-    ? "https://mesmerizer-admin-2025.vercel.app"
+    ? "https://admin.mesmerizernsec.club"
     : "http://localhost:5173";
 
 export const GOOGLE_CALLBACK_URL =
