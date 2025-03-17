@@ -16,8 +16,8 @@ export default {
         event_location TEXT NOT NULL,
         collage_name TEXT NOT NULL,
         amount_paid INT NOT NULL,
-        transaction_id TEXT,
-        transaction_screenshot TEXT,
+        transaction_id TEXT NOT NULL UNIQUE,
+        transaction_screenshot TEXT NOT NULL UNIQUE,
         status TEXT NOT NULL CHECK (status IN ('approved', 'pending', 'rejected')) DEFAULT 'pending',
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
