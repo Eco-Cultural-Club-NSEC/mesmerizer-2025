@@ -9,6 +9,7 @@ import isAdmin from "../middlewares/isAdmin.js";
 
 // routes -------------------------------------------------
 router.get("/all", verifyAuth, userController.getUsers)
+router.delete("/delete", verifyAuth, isAdmin, userController.deleteUser);
 router.get("/toggleadmin", verifyAuth, isAdmin, adminController.toggleAdmin);
 
 export default router;

@@ -20,6 +20,26 @@ export const participantController = {
       res.status(500).json({ message: "Internal Server Error" });
     }
   },
+  deleteParticipant: async (req, res) => {
+    try {
+      const { id } = req.query;
+      if (!id) {
+        return res.status(400).json({ message: "ID parameter is missing" });
+      }
+      const participant = await db("SELECT * FROM participants WHERE id = $1", [
+        id,
+      ]);
+      if (!participant) {
+        return res.status(404).json({ message: "Participant not found" });
+      }
+      await db("DELETE FROM participants WHERE id = $1", [id]);
+      logger.info(`Participant ${id} deleted`);
+      res.status(200).json({ message: `Participant ${id} deleted` });
+    } catch (error) {
+      logger.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
   // register a participant
   registerParticipant: async (req, res) => {
     try {

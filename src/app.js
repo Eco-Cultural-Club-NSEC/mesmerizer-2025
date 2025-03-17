@@ -14,7 +14,7 @@ app.get("/", (req, res) => res.send("Express on Vercel"));
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://mesmerizer-admin-2025.vercel.app"], // Explicitly set frontend URL
+    origin: ["http://localhost:5173", "https://mesmerizer-admin-2025.vercel.app", "https://www.mesmerizernsec.club"], // Explicitly set frontend URL
     credentials: true, // Allow cookies & authentication headers
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],

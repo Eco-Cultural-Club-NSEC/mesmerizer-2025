@@ -14,5 +14,6 @@ router.get("/togglestatus", verifyAuth, isAdmin, participantController.toggleApp
 
 //to be used on registration page
 router.post("/register", participantController.registerParticipant);
+router.delete("/delete", verifyAuth, isAdmin, participantController.deleteParticipant);
 
 export default router;
