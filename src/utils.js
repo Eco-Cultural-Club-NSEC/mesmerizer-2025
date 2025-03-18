@@ -128,5 +128,5 @@ export const FE_REDIRECT_URL =
 
 export const GOOGLE_CALLBACK_URL =
   process.env.NODE_ENV === "production"
-    ? "https://mesmerizer-2025-seven.vercel.app/api/v1/auth/google/callback"
+    ? "https://api.mesmerizernsec.club/api/v1/auth/google/callback"
     : "http://localhost:5001/api/v1/auth/google/callback";

@@ -75,7 +75,7 @@ export const participantController = {
         ]
       );
 
-      // // Send email asynchronously in the background
+      // // Send email asynchronously in the background: creating issues in deployed environment (vercel)
       // setImmediate(async () => {
       //   try {
       //     const template = registrationReceivedMailTemplate(result.rows[0]);
@@ -178,6 +178,7 @@ export const participantController = {
 
       try {
         await db("BEGIN");
+
         const result = await db(
           "UPDATE participants SET status = $1 WHERE id = $2 RETURNING *",
           [status, id]
@@ -187,37 +188,42 @@ export const participantController = {
           throw new Error("Failed to update participant status");
         }
 
+        // Send email synchronously before committing transaction
+        try {
+          await sendMail({
+            to: participant.email,
+            subject: template.subject,
+            content: mailBody,
+          });
+
+          logger.info(`Approval/rejection email sent to ${participant.email}`);
+        } catch (emailError) {
+          await db("ROLLBACK"); // Rollback DB update if email fails
+          logger.error(`Failed to send mail: ${emailError.message}`);
+          return res
+            .status(500)
+            .json({
+              message: "Failed to send email. Approval status update aborted.",
+            });
+        }
+
         await db("COMMIT");
         logger.info(`Participant - ${id} status updated to ${status}`);
 
-        res.status(200).json({
+        return res.status(200).json({
           message: `Participant - ${id} status updated to ${status}`,
           participant: result.rows[0],
-        });
-
-        // Send mail asynchronously
-        setImmediate(async () => {
-          try {
-            await sendMail({
-              to: participant.email,
-              subject: template.subject,
-              content: mailBody,
-            });
-            logger.info(
-              `Approval/rejection email sent to ${participant?.email}`
-            );
-          } catch (emailError) {
-            logger.error(`Failed to send mail: ${emailError.message}`);
-          }
         });
       } catch (error) {
         await db("ROLLBACK");
         logger.error(error.message);
-        res.status(500).json({ message: "Error updating participant status" });
+        return res
+          .status(500)
+          .json({ message: "Error updating participant status" });
       }
     } catch (error) {
       logger.error(error.stack || error.message);
-      res.status(500).json({ message: "Internal Server Error" });
+      return res.status(500).json({ message: "Internal Server Error" });
     }
   },
 };
