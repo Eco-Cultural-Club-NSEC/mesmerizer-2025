@@ -86,7 +86,12 @@ export const participantController = {
       setImmediate(async () => {
         try {
           const template = registrationReceivedMailTemplate(result.rows[0]);
-          await sendMail(email, template.subject, template.content);
+          await sendMail({
+            to: email,
+            subject: template.subject,
+            content: template.content,
+          });
+          logger.info(`Registration email sent to ${email}`);
         } catch (emailError) {
           logger.error(
             `Failed to send registration email to ${email}: ${emailError.message}`
@@ -95,15 +100,23 @@ export const participantController = {
       });
     } catch (error) {
       if (error.code === "23505") {
-        if (error.constraint === "participants_transaction_id_key") {
-          return res.status(409).json({
-            message: `Transaction ID - ${transaction_id} already exists`,
-          });
-        }
-        if (error.constraint === "participants_transaction_screenshot_key") {
-          return res.status(409).json({
-            message: `Transaction screenshot - ${transaction_screenshot} already exists`,
-          });
+        const { constraint, detail } = error;
+        const match = detail.match(/\(([^)]+)\)=\(([^)]+)\)/);
+
+        if (match) {
+          const [_, key, value] = match;
+
+          if (key === "transaction_id") {
+            return res.status(409).json({
+              message: `Transaction ID - ${value} already exists`,
+            });
+          }
+
+          if (key === "transaction_screenshot") {
+            return res.status(409).json({
+              message: `Transaction screenshot - ${value} already exists`,
+            });
+          }
         }
       }
       logger.error(error);
@@ -139,10 +152,9 @@ export const participantController = {
 
       const mailBody = constructMailBody({ participant, template });
 
-      const client = await db.connect();
       try {
-        await client.query("BEGIN");
-        const result = await client.query(
+        await db("BEGIN");
+        const result = await db(
           "UPDATE participants SET status = $1 WHERE id = $2 RETURNING *",
           [status, id]
         );
@@ -151,7 +163,7 @@ export const participantController = {
           throw new Error("Failed to update participant status");
         }
 
-        await client.query("COMMIT");
+        await db("COMMIT");
         logger.info(`Participant - ${id} status updated to ${status}`);
 
         res.status(200).json({
@@ -167,16 +179,15 @@ export const participantController = {
               subject: template.subject,
               content: mailBody,
             });
+            logger.info(`Approval/rejection email sent to ${email}`);
           } catch (emailError) {
             logger.error(`Failed to send mail: ${emailError.message}`);
           }
         });
       } catch (error) {
-        await client.query("ROLLBACK");
+        await db("ROLLBACK");
         logger.error(error.message);
         res.status(500).json({ message: "Error updating participant status" });
-      } finally {
-        client.release();
       }
     } catch (error) {
       logger.error(error.stack || error.message);
