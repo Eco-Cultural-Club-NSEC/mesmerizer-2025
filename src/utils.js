@@ -27,7 +27,7 @@ export const generateToken = function (email, id) {
 
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  secure: true,
+  secure: process.env.EMAIL_SECURE,
   port: process.env.EMAIL_PORT,
   auth: {
     user: process.env.EMAIL,
