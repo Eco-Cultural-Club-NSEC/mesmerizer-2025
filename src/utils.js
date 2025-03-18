@@ -27,8 +27,8 @@ export const generateToken = function (email, id) {
 
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  secure: process.env.EMAIL_SECURE,
-  port: process.env.EMAIL_PORT,
+  port: Number(process.env.EMAIL_PORT) || 465, // Ensure correct type
+  secure: process.env.EMAIL_PORT == "465", // Must be `true` for port 465
   auth: {
     user: process.env.EMAIL,
     pass: process.env.EMAIL_PASSWORD,
@@ -36,6 +36,7 @@ const transporter = nodemailer.createTransport({
 
   connectionTimeout: 30000, // Increase timeout to 30 seconds
   tls: {
+    minVersion: "TLSv1.2",
     rejectUnauthorized: false, // Helps with SSL issues
   },
 });

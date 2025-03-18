@@ -44,6 +44,7 @@ export const participantController = {
   // register a participant
   registerParticipant: async (req, res) => {
     try {
+      await db("BEGIN"); // Start a transaction
       const {
         name,
         email,
@@ -83,22 +84,33 @@ export const participantController = {
       logger.info(`Participant - ${name} registered`);
 
       // Send email asynchronously in the background
-      setImmediate(async () => {
-        try {
-          const template = registrationReceivedMailTemplate(result.rows[0]);
-          await sendMail({
-            to: email,
-            subject: template.subject,
-            content: template.content,
-          });
-          logger.info(`Registration email sent to ${email}`);
-        } catch (emailError) {
-          logger.error(
-            `Failed to send registration email to ${email}: ${emailError.message}`
-          );
-        }
+      // setImmediate(async () => {
+      //   try {
+      //     const template = registrationReceivedMailTemplate(result.rows[0]);
+      //     await sendMail({
+      //       to: email,
+      //       subject: template.subject,
+      //       content: template.content,
+      //     });
+      //     logger.info(`Registration email sent to ${email}`);
+      //   } catch (emailError) {
+      //     logger.error(
+      //       `Failed to send registration email to ${email}: ${emailError.message}`
+      //     );
+      //   }
+      // });
+
+      // Send email synchronously
+      const template = registrationReceivedMailTemplate(result.rows[0]);
+      await sendMail({
+        to: email,
+        subject: template.subject,
+        content: template.content,
       });
+      logger.info(`Registration email sent to ${email}`);
+      await db("COMMIT");
     } catch (error) {
+      await db("ROLLBACK");
       if (error.code === "23505") {
         const { constraint, detail } = error;
         const match = detail.match(/\(([^)]+)\)=\(([^)]+)\)/);
