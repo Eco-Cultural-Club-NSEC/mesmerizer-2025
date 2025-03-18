@@ -33,6 +33,11 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL,
     pass: process.env.EMAIL_PASSWORD,
   },
+
+  connectionTimeout: 30000, // Increase timeout to 30 seconds
+  tls: {
+    rejectUnauthorized: false, // Helps with SSL issues
+  },
 });
 
 // Function to send an email

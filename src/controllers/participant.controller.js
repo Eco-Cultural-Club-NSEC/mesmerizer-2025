@@ -179,7 +179,9 @@ export const participantController = {
               subject: template.subject,
               content: mailBody,
             });
-            logger.info(`Approval/rejection email sent to ${email}`);
+            logger.info(
+              `Approval/rejection email sent to ${participant?.email}`
+            );
           } catch (emailError) {
             logger.error(`Failed to send mail: ${emailError.message}`);
           }
