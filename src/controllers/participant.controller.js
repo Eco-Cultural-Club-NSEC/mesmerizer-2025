@@ -83,22 +83,19 @@ export const participantController = {
       // Log registration after successful response
       logger.info(`Participant - ${name} registered`);
 
-      // Send email asynchronously in the background
-      setImmediate(async () => {
-        try {
-          const template = registrationReceivedMailTemplate(result.rows[0]);
-          await sendMail({
-            to: email,
-            subject: template.subject,
-            content: template.content,
-          });
-          logger.info(`Registration email sent to ${email}`);
-        } catch (emailError) {
-          logger.error(
-            `Failed to send registration email to ${email}: ${emailError.message}`
-          );
-        }
-      });
+      try {
+        const template = registrationReceivedMailTemplate(result.rows[0]);
+        await sendMail({
+          to: email,
+          subject: template.subject,
+          content: template.content,
+        });
+        logger.info(`Registration email sent to ${email}`);
+      } catch (emailError) {
+        logger.error(
+          `Failed to send registration email to ${email}: ${emailError.message}`
+        );
+      }
 
       await db("COMMIT");
     } catch (error) {
