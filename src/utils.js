@@ -17,11 +17,21 @@ export const generateToken = function (email, id) {
   }
 };
 
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: process.env.EMAIL, // Your email
+//     pass: process.env.EMAIL_PASSWORD, // Your email password or app password
+//   },
+// });
+
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: process.env.EMAIL_HOST,
+  secure: true,
+  port: process.env.EMAIL_PORT,
   auth: {
-    user: process.env.EMAIL, // Your email
-    pass: process.env.EMAIL_PASSWORD, // Your email password or app password
+    user: process.env.EMAIL,
+    pass: process.env.EMAIL_PASSWORD,
   },
 });
 

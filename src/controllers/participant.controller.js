@@ -78,8 +78,20 @@ export const participantController = {
         participant: result.rows[0],
       });
     } catch (error) {
+      if (error.code === "23505") {
+        if (error.constraint === "participants_transaction_id_key") {
+          return res.status(409).json({
+            message: `Transaction ID - ${transaction_id} already exists`,
+          });
+        }
+        if (error.constraint === "participants_transaction_screenshot_key") {
+          return res.status(409).json({
+            message: `Transaction screenshot - ${transaction_screenshot} already exists`,
+          });
+        }
+      }
       logger.error(error);
-      res.status(500).json({ message: "Internal Server Error" });
+      res.status(500).json({ message: "An unexpected error occurred during registration. Please try again later." });
     }
   },
   // toggle approve status of a participant
