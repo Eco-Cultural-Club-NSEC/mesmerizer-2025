@@ -1,3 +1,4 @@
+import { registrationReceivedMailTemplate } from "../../assets/mailTemplate.js";
 import logger from "../config/logger.js";
 import { query as db } from "../db/db.js";
 import {
@@ -72,10 +73,25 @@ export const participantController = {
           transaction_screenshot,
         ]
       );
-      logger.info(`Participant - ${name[0]} registered`);
+
       res.status(201).json({
         message: "Participant registered",
         participant: result.rows[0],
+      });
+
+      // Log registration after successful response
+      logger.info(`Participant - ${name} registered`);
+
+      // Send email asynchronously in the background
+      setImmediate(async () => {
+        try {
+          const template = registrationReceivedMailTemplate(result.rows[0]);
+          await sendMail(email, template.subject, template.content);
+        } catch (emailError) {
+          logger.error(
+            `Failed to send registration email to ${email}: ${emailError.message}`
+          );
+        }
       });
     } catch (error) {
       if (error.code === "23505") {
@@ -91,58 +107,79 @@ export const participantController = {
         }
       }
       logger.error(error);
-      res.status(500).json({ message: "An unexpected error occurred during registration. Please try again later." });
+      res.status(500).json({
+        message:
+          "An unexpected error occurred during registration. Please try again later.",
+      });
     }
   },
   // toggle approve status of a participant
   toggleApproveStatus: async (req, res) => {
     try {
-      const { id } = req.query;
-      const { status } = req.query;
-      // get participant
-      const participant = await getParticipantById(id);
+      const { id, status } = req.query;
 
+      if (!id || !status) {
+        return res
+          .status(400)
+          .json({ message: "Missing required parameters: id or status" });
+      }
+
+      const participant = await getParticipantById(id);
       if (!participant) {
         logger.error("Participant not found");
         return res.status(404).json({ message: "Participant not found" });
       }
-      // get corrospnding mail template approval/rejection
+
       const mailTemplateId = mapEmailTemplateIdToStatus(status);
       const template = await getMailTemplateById(mailTemplateId);
-
       if (!template) {
         logger.error("Mail template not found");
         return res.status(404).json({ message: "Mail template not found" });
       }
 
-      // construct mail body by replacing placeholders
       const mailBody = constructMailBody({ participant, template });
 
-      const mailOptions = {
-        to: participant.email,
-        subject: template.subject,
-        content: mailBody,
-      };
-      // send mail
-      const info = await sendMail(mailOptions);
+      const client = await db.connect();
+      try {
+        await client.query("BEGIN");
+        const result = await client.query(
+          "UPDATE participants SET status = $1 WHERE id = $2 RETURNING *",
+          [status, id]
+        );
 
-      if (!info) {
-        logger.error("Error sending mail");
-        return res.status(500).json({ message: "Error sending mail" });
+        if (!result.rows[0]) {
+          throw new Error("Failed to update participant status");
+        }
+
+        await client.query("COMMIT");
+        logger.info(`Participant - ${id} status updated to ${status}`);
+
+        res.status(200).json({
+          message: `Participant - ${id} status updated to ${status}`,
+          participant: result.rows[0],
+        });
+
+        // Send mail asynchronously
+        setImmediate(async () => {
+          try {
+            await sendMail({
+              to: participant.email,
+              subject: template.subject,
+              content: mailBody,
+            });
+          } catch (emailError) {
+            logger.error(`Failed to send mail: ${emailError.message}`);
+          }
+        });
+      } catch (error) {
+        await client.query("ROLLBACK");
+        logger.error(error.message);
+        res.status(500).json({ message: "Error updating participant status" });
+      } finally {
+        client.release();
       }
-
-      // update status to approved / rejected
-      const result = await db(
-        "UPDATE participants SET status = $1 WHERE id = $2 RETURNING *",
-        [status, id]
-      );
-      logger.info(`Participant - ${id} status updated to ${status}`);
-      res.status(200).json({
-        message: `Participant - ${id} status updated to ${status}`,
-        participant: result.rows[0],
-      });
     } catch (error) {
-      console.log(error);
+      logger.error(error.stack || error.message);
       res.status(500).json({ message: "Internal Server Error" });
     }
   },
