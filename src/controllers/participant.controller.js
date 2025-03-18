@@ -75,22 +75,41 @@ export const participantController = {
         ]
       );
 
-      // Send email asynchronously in the background
-      setImmediate(async () => {
-        try {
-          const template = registrationReceivedMailTemplate(result.rows[0]);
-          await sendMail({
-            to: email,
-            subject: template.subject,
-            content: template.content,
-          });
-          logger.info(`Registration email sent to ${email}`);
-        } catch (emailError) {
-          logger.error(
-            `Failed to send registration email to ${email}: ${emailError.message}`
-          );
-        }
-      });
+      // // Send email asynchronously in the background
+      // setImmediate(async () => {
+      //   try {
+      //     const template = registrationReceivedMailTemplate(result.rows[0]);
+      //     await sendMail({
+      //       to: email,
+      //       subject: template.subject,
+      //       content: template.content,
+      //     });
+      //     logger.info(`Registration email sent to ${email}`);
+      //   } catch (emailError) {
+      //     logger.error(
+      //       `Failed to send registration email to ${email}: ${emailError.message}`
+      //     );
+      //   }
+      // });
+
+      // Send email before committing DB transaction
+      try {
+        const template = registrationReceivedMailTemplate(result.rows[0]);
+        await sendMail({
+          to: email,
+          subject: template.subject,
+          content: template.content,
+        });
+        logger.info(`Registration email sent to ${email}`);
+      } catch (emailError) {
+        logger.error(
+          `Failed to send registration email to ${email}: ${emailError.message}`
+        );
+        await db("ROLLBACK"); // Rollback if email fails
+        return res
+          .status(500)
+          .json({ message: "Failed to send email. Registration aborted." });
+      }
 
       // Commit the transaction
       await db("COMMIT");
