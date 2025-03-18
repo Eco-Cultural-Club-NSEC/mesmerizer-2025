@@ -75,29 +75,33 @@ export const participantController = {
         ]
       );
 
-      res.status(201).json({
-        message: "Participant registered",
-        participant: result.rows[0],
+      // Send email asynchronously in the background
+      setImmediate(async () => {
+        try {
+          const template = registrationReceivedMailTemplate(result.rows[0]);
+          await sendMail({
+            to: email,
+            subject: template.subject,
+            content: template.content,
+          });
+          logger.info(`Registration email sent to ${email}`);
+        } catch (emailError) {
+          logger.error(
+            `Failed to send registration email to ${email}: ${emailError.message}`
+          );
+        }
       });
+
+      // Commit the transaction
+      await db("COMMIT");
 
       // Log registration after successful response
       logger.info(`Participant - ${name} registered`);
 
-      try {
-        const template = registrationReceivedMailTemplate(result.rows[0]);
-        await sendMail({
-          to: email,
-          subject: template.subject,
-          content: template.content,
-        });
-        logger.info(`Registration email sent to ${email}`);
-      } catch (emailError) {
-        logger.error(
-          `Failed to send registration email to ${email}: ${emailError.message}`
-        );
-      }
-
-      await db("COMMIT");
+      res.status(201).json({
+        message: "Participant registered",
+        participant: result.rows[0],
+      });
     } catch (error) {
       await db("ROLLBACK");
       if (error.code === "23505") {
