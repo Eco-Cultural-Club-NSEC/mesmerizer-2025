@@ -48,10 +48,9 @@ export const sendMail = async ({ to, subject, content } = {}) => {
       return false;
     }
     const mailOptions = {
-      from: process.env.EMAIL,
+      from: `"Mesmerizer'25" <${process.env.EMAIL}>`,
       to: to,
       subject: subject,
-      // text: content, // For plain text email
       html: content, // For HTML email
     };
 
