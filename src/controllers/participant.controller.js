@@ -59,7 +59,7 @@ export const participantController = {
         transaction_screenshot,
       } = req.body;
       const result = await db(
-        "INSERT INTO participants (name, email, whatsapp_no, alt_phone, event, event_date, event_location, collage_name, amount_paid, transaction_id, transaction_screenshot) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *",
+        "INSERT INTO participants (name, email, whatsapp_no, alt_phone, event, event_date, event_location, collage_name, amount_paid, transaction_id, transaction_screenshot) VALUES ($1, $2, $3, $4, $5, to_date($6, 'DD-MM-YYYY'), $7, $8, $9, $10, $11) RETURNING *",
         [
           name,
           email,
@@ -200,11 +200,9 @@ export const participantController = {
         } catch (emailError) {
           await db("ROLLBACK"); // Rollback DB update if email fails
           logger.error(`Failed to send mail: ${emailError.message}`);
-          return res
-            .status(500)
-            .json({
-              message: "Failed to send email. Approval status update aborted.",
-            });
+          return res.status(500).json({
+            message: "Failed to send email. Approval status update aborted.",
+          });
         }
 
         await db("COMMIT");
