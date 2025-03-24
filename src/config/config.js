@@ -1,6 +1,7 @@
 console.log("config");
-import dotenv from "dotenv";
-dotenv.config();
+
+console.log(process.env.PORT);
+
 
 export const config = {
     db: {

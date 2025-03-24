@@ -116,7 +116,7 @@ export const constructMailBody = ({ participant, template } = {}) => {
   const mailBody = template.content
     .replace(/{{name}}/g, participant.name[0])
     .replace(/{{event}}/g, participant.event)
-    .replace(/{{eventDate}}/g, participant.event_date)
+    .replace(/{{eventDate}}/g, new Date(participant.event_date).toDateString())
     .replace(/{{eventLocation}}/g, participant.event_location);
   return mailBody;
 };

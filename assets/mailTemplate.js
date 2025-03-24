@@ -83,7 +83,7 @@ export const registrationReceivedMailTemplate = (participant) => {
               participant.alt_phone
             }</li>
             <li><strong>Event:</strong> ${participant.event}</li>
-            <li><strong>Event Date:</strong> ${participant.event_date}</li>
+            <li><strong>Event Date:</strong> ${new Date(participant.event_date).toDateString()}</li>
             <li><strong>Event Location:</strong> ${participant.event_location}</li>
             <li><strong>College Name:</strong> ${participant.collage_name}</li>
             <li><strong>Amount Paid:</strong> ₹${participant.amount_paid}</li>
